@@ -2896,6 +2896,16 @@
   color: #10203f;
   font-size: 18px;
 }
+.rede-contagem-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rede-donut {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
 .rede-vis-pub {
   margin-left: 10px;
   color: #1a7f4b;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { ESTADOS, TIPOS, type Prestador, type TipoRecurso } from '../data/rede'
 import { ESPECIALIDADES_PADRAO } from '../data/especialidades'
 import { REDES_PADRAO } from '../data/redesPlanos'
@@ -206,12 +207,45 @@ export default function AdminCredenciadas() {
       )}
 
       <div className="admin-barra">
-        <p className="rede-contagem">
-          <strong>{listaFiltrada.length}</strong>
-          {busca.trim() ? ` de ${lista.length}` : ''} prestadores
-          <span className="rede-vis-pub">· {lista.filter((p) => p.visivel !== false).length} públicos</span>
-          <span className="rede-vis-nao">· {lista.filter((p) => p.visivel === false).length} não públicos</span>
-        </p>
+        <div className="rede-contagem-wrap">
+          <div className="rede-donut">
+            <ResponsiveContainer width={64} height={64}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Públicos', value: lista.filter((p) => p.visivel !== false).length },
+                    { name: 'Não públicos', value: lista.filter((p) => p.visivel === false).length },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={18}
+                  outerRadius={30}
+                  startAngle={90}
+                  endAngle={-270}
+                  dataKey="value"
+                  isAnimationActive
+                  animationBegin={0}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                  strokeWidth={0}
+                >
+                  <Cell fill="#1a7f4b" />
+                  <Cell fill="#d1d5db" />
+                </Pie>
+                <Tooltip
+                  formatter={(v: number, name: string) => [v, name]}
+                  contentStyle={{ fontSize: 12 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="rede-contagem">
+            <strong>{listaFiltrada.length}</strong>
+            {busca.trim() ? ` de ${lista.length}` : ''} prestadores
+            <span className="rede-vis-pub">· {lista.filter((p) => p.visivel !== false).length} públicos</span>
+            <span className="rede-vis-nao">· {lista.filter((p) => p.visivel === false).length} não públicos</span>
+          </p>
+        </div>
         <button type="button" className="btn btn-primary" onClick={() => setForm(FORM_VAZIO)}>
           + Novo prestador
         </button>
@@ -448,3 +482,4 @@ export default function AdminCredenciadas() {
     </>
   )
 }
+
