@@ -209,6 +209,8 @@ export default function AdminCredenciadas() {
         <p className="rede-contagem">
           <strong>{listaFiltrada.length}</strong>
           {busca.trim() ? ` de ${lista.length}` : ''} prestadores
+          <span className="rede-vis-pub">· {lista.filter((p) => p.visivel !== false).length} públicos</span>
+          <span className="rede-vis-nao">· {lista.filter((p) => p.visivel === false).length} não públicos</span>
         </p>
         <button type="button" className="btn btn-primary" onClick={() => setForm(FORM_VAZIO)}>
           + Novo prestador

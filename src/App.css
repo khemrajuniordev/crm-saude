@@ -2896,6 +2896,17 @@
   color: #10203f;
   font-size: 18px;
 }
+.rede-vis-pub {
+  margin-left: 10px;
+  color: #1a7f4b;
+  font-size: 13px;
+  font-weight: 500;
+}
+.rede-vis-nao {
+  margin-left: 6px;
+  color: #888;
+  font-size: 13px;
+}
 
 .rede-limpar,
 .rede-link {
