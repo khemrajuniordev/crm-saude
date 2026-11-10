@@ -160,6 +160,7 @@ export default function AdminCRMPainel() {
   const [lista, setLista] = useState<SolicitacaoCRM[]>([])
   const [idsDoc, setIdsDoc] = useState<Set<string>>(new Set())
   const [periodo, setPeriodo] = useState<Periodo>('90')
+  const [alertasAberto, setAlertasAberto] = useState(false)
 
   const recarregar = useCallback(async () => {
     const [dados, docs] = await Promise.all([listarSolicitacoes(), idsComDocumento()])
@@ -293,26 +294,38 @@ export default function AdminCRMPainel() {
       </div>
 
       <section className="pnl-card pnl-alertas">
-        <h3>
-          Alertas para revisão
-          {alertas.length > 0 && <span className="pnl-alertas-n">{alertas.length}</span>}
-        </h3>
-        <p className="pnl-cap">Avisos automáticos — confira antes de pagar. Não bloqueia nada.</p>
-        {alertas.length === 0 ? (
-          <p className="crm-aviso">Nenhum alerta no momento.</p>
-        ) : (
-          <ul className="pnl-alertas-lista">
-            {alertas.map((a, i) => (
-              <li key={`${a.id}-${a.tipo}-${i}`}>
-                <span className={`crm-badge pnl-alerta-tag t-${a.tipo}`}>
-                  {ROTULO_ALERTA[a.tipo]}
-                </span>
-                <span className="pnl-alerta-txt">
-                  <strong>{a.protocolo}</strong> · {a.beneficiario} — {a.motivo}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <button
+          type="button"
+          className="pnl-alertas-cab"
+          onClick={() => setAlertasAberto((v) => !v)}
+          aria-expanded={alertasAberto}
+        >
+          <span className="pnl-alertas-titulo">
+            Alertas para revisão
+            {alertas.length > 0 && <span className="pnl-alertas-n">{alertas.length}</span>}
+          </span>
+          <span className={`pnl-alertas-seta${alertasAberto ? ' aberto' : ''}`} aria-hidden="true">▼</span>
+        </button>
+        {alertasAberto && (
+          <>
+            <p className="pnl-cap">Avisos automáticos — confira antes de pagar. Não bloqueia nada.</p>
+            {alertas.length === 0 ? (
+              <p className="crm-aviso">Nenhum alerta no momento.</p>
+            ) : (
+              <ul className="pnl-alertas-lista">
+                {alertas.map((a, i) => (
+                  <li key={`${a.id}-${a.tipo}-${i}`}>
+                    <span className={`crm-badge pnl-alerta-tag t-${a.tipo}`}>
+                      {ROTULO_ALERTA[a.tipo]}
+                    </span>
+                    <span className="pnl-alerta-txt">
+                      <strong>{a.protocolo}</strong> · {a.beneficiario} — {a.motivo}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </section>
 

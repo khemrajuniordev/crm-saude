@@ -6479,10 +6479,33 @@ button.crm-card:hover {
 .pnl-alertas {
   margin: 18px 0;
 }
-.pnl-alertas h3 {
+.pnl-alertas-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.pnl-alertas-titulo {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.pnl-alertas-seta {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  transition: transform 0.2s ease;
+}
+.pnl-alertas-seta.aberto {
+  transform: rotate(180deg);
 }
 .pnl-alertas-n {
   font-size: 12px;
