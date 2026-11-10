@@ -6373,10 +6373,17 @@ button.crm-card:hover {
   height: 14px;
   overflow: hidden;
 }
+@keyframes pnl-cresce-h {
+  from { width: 0 !important; }
+}
+@keyframes pnl-cresce-v {
+  from { height: 0 !important; }
+}
 .pnl-fill {
   display: block;
   height: 100%;
   border-radius: 6px;
+  animation: pnl-cresce-h 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .pnl-v {
   font-size: 13px;
@@ -6415,6 +6422,7 @@ button.crm-card:hover {
   max-width: 40px;
   background: var(--surface-tint);
   border-radius: 7px 7px 3px 3px;
+  animation: pnl-cresce-v 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .pnl-vcol.cur .pnl-vbar {
   background: var(--blue-500);

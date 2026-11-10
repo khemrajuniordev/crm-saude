@@ -225,9 +225,16 @@ export default function AdminCRMPainel() {
   const maxBenef = Math.max(1, ...m.topBenef.map((t) => t.n))
   const maxDia = Math.max(1, ...m.dias.map((d) => d.qtd))
 
-  const barra = (valor: number, max: number, cor: string) => (
+  const barra = (valor: number, max: number, cor: string, delay = 0) => (
     <span className="pnl-track">
-      <span className="pnl-fill" style={{ width: `${(valor / max) * 100}%`, background: cor }} />
+      <span
+        className="pnl-fill"
+        style={{
+          width: `${(valor / max) * 100}%`,
+          background: cor,
+          animationDelay: `${delay}ms`,
+        }}
+      />
     </span>
   )
 
@@ -337,27 +344,27 @@ export default function AdminCRMPainel() {
           <div className="pnl-hbars">
             <div className="pnl-hbar">
               <span className="pnl-n">Pago</span>
-              {barra(m.etapas.pago, maxEtapa, 'var(--tom-ok)')}
+              {barra(m.etapas.pago, maxEtapa, 'var(--tom-ok)', 0)}
               <span className="pnl-v">{m.etapas.pago}</span>
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Pagamento agendado</span>
-              {barra(m.etapas.agendado, maxEtapa, 'var(--tom-analise)')}
+              {barra(m.etapas.agendado, maxEtapa, 'var(--tom-analise)', 80)}
               <span className="pnl-v">{m.etapas.agendado}</span>
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Aguardando financeiro</span>
-              {barra(m.etapas.financeiro, maxEtapa, 'var(--tom-aguardando)')}
+              {barra(m.etapas.financeiro, maxEtapa, 'var(--tom-aguardando)', 160)}
               <span className="pnl-v">{m.etapas.financeiro}</span>
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Aguardando enfermagem</span>
-              {barra(m.etapas.enfermagem, maxEtapa, 'var(--tom-aguardando)')}
+              {barra(m.etapas.enfermagem, maxEtapa, 'var(--tom-aguardando)', 240)}
               <span className="pnl-v">{m.etapas.enfermagem}</span>
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Não autorizado</span>
-              {barra(m.etapas.recusado, maxEtapa, 'var(--tom-recusado)')}
+              {barra(m.etapas.recusado, maxEtapa, 'var(--tom-recusado)', 320)}
               <span className="pnl-v">{m.etapas.recusado}</span>
             </div>
           </div>
@@ -373,7 +380,10 @@ export default function AdminCRMPainel() {
                 <span className="pnl-vv">{b.valor ? compacto(b.valor) : '—'}</span>
                 <span
                   className="pnl-vbar"
-                  style={{ height: `${Math.max(2, (b.valor / maxMes) * 100)}%` }}
+                  style={{
+                    height: `${Math.max(2, (b.valor / maxMes) * 100)}%`,
+                    animationDelay: `${i * 70}ms`,
+                  }}
                 />
                 <span className="pnl-m">{b.rotulo}</span>
               </div>
@@ -387,10 +397,10 @@ export default function AdminCRMPainel() {
           <p className="pnl-cap">Quem mais abriu solicitações</p>
           <div className="pnl-hbars">
             {m.top.length === 0 && <p className="crm-aviso">Sem dados no período.</p>}
-            {m.top.map((t) => (
+            {m.top.map((t, i) => (
               <div className="pnl-hbar" key={t.nome}>
                 <span className="pnl-n">{t.nome}</span>
-                {barra(t.n, maxSolic, 'var(--blue-500)')}
+                {barra(t.n, maxSolic, 'var(--blue-500)', i * 80)}
                 <span className="pnl-v">{t.n}</span>
               </div>
             ))}
@@ -403,10 +413,10 @@ export default function AdminCRMPainel() {
           <p className="pnl-cap">Pacientes com mais solicitações</p>
           <div className="pnl-hbars">
             {m.topBenef.length === 0 && <p className="crm-aviso">Sem dados no período.</p>}
-            {m.topBenef.map((t) => (
+            {m.topBenef.map((t, i) => (
               <div className="pnl-hbar" key={t.nome}>
                 <span className="pnl-n">{t.nome}</span>
-                {barra(t.n, maxBenef, 'var(--blue-400)')}
+                {barra(t.n, maxBenef, 'var(--blue-400)', i * 80)}
                 <span className="pnl-v">{t.n}</span>
               </div>
             ))}
@@ -423,7 +433,10 @@ export default function AdminCRMPainel() {
                 <span className="pnl-vv">{d.qtd || ''}</span>
                 <span
                   className="pnl-vbar"
-                  style={{ height: `${d.qtd ? Math.max(3, (d.qtd / maxDia) * 100) : 0}%` }}
+                  style={{
+                    height: `${d.qtd ? Math.max(3, (d.qtd / maxDia) * 100) : 0}%`,
+                    animationDelay: `${i * 40}ms`,
+                  }}
                 />
                 <span className="pnl-m">{d.rotulo}</span>
               </div>
@@ -505,3 +518,4 @@ export default function AdminCRMPainel() {
     </div>
   )
 }
+
