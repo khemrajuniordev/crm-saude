@@ -17,6 +17,9 @@ import AdminCRM from './pages/AdminCRM'
 import AdminCRMUsuarios from './pages/AdminCRMUsuarios'
 import AdminCRMPainel from './pages/AdminCRMPainel'
 import AdminCases from './pages/AdminCases'
+import AdminDPS from './pages/AdminDPS'
+import AdminDPSUsuarios from './pages/AdminDPSUsuarios'
+import AdminDPSPainel from './pages/AdminDPSPainel'
 import EmBreve from './pages/EmBreve'
 import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
 import InformacoesRegulatorias from './pages/InformacoesRegulatorias'
@@ -65,6 +68,9 @@ function App() {
           <Route path="crm/usuarios" element={<AdminCRMUsuarios />} />
           <Route path="crm/painel" element={<AdminCRMPainel />} />
           <Route path="cases" element={<AdminCases />} />
+          <Route path="dps" element={<AdminDPS />} />
+          <Route path="dps/usuarios" element={<AdminDPSUsuarios />} />
+          <Route path="dps/painel" element={<AdminDPSPainel />} />
         </Route>
       </Routes>
       {analyticsEnabled && (
