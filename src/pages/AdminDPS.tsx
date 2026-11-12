@@ -184,7 +184,7 @@ export default function AdminDPS() {
   // ---- salvar novo ----
   async function salvarNovo() {
     if (!form.nomeTitular.trim()) { setErroForm('Informe o nome do titular.'); return }
-    if (!form.nomeCrianca.trim()) { setErroForm('Informe o nome da criança.'); return }
+    if (!form.nomeCrianca.trim()) { setErroForm('Informe o nome do beneficiário.'); return }
     if (!form.tipoPlano) { setErroForm('Selecione o tipo de plano.'); return }
     setErroForm('')
     setSalvando(true)
@@ -218,7 +218,7 @@ export default function AdminDPS() {
   async function salvarEdicao() {
     if (!detalhe) return
     if (!form.nomeTitular.trim()) { setErroForm('Informe o nome do titular.'); return }
-    if (!form.nomeCrianca.trim()) { setErroForm('Informe o nome da criança.'); return }
+    if (!form.nomeCrianca.trim()) { setErroForm('Informe o nome do beneficiário.'); return }
     setErroForm('')
     setSalvando(true)
     try {
@@ -346,7 +346,7 @@ export default function AdminDPS() {
           </fieldset>
 
           <fieldset className="crm-fieldset">
-            <legend>Criança / Dependente</legend>
+            <legend>Beneficiário</legend>
             <div className="crm-campos">
               <div className="campo">
                 <label>Nome completo <span className="crm-req">*</span></label>
@@ -357,7 +357,7 @@ export default function AdminDPS() {
                 <input type="date" value={form.dataNascimento} onChange={(e) => setForm((f) => ({ ...f, dataNascimento: e.target.value }))} />
               </div>
               <div className="campo">
-                <label>CPF da criança</label>
+                <label>CPF do beneficiário</label>
                 <input value={form.cpfCrianca} onChange={(e) => setForm((f) => ({ ...f, cpfCrianca: mascaraDocumento(e.target.value) }))} placeholder="000.000.000-00" />
               </div>
             </div>
@@ -479,7 +479,7 @@ export default function AdminDPS() {
           </section>
 
           <section className="crm-bloco">
-            <h4>Criança / Dependente</h4>
+            <h4>Beneficiário</h4>
             <dl className="crm-dl">
               <dt>Nome</dt><dd>{s.nomeCrianca}</dd>
               <dt>Nascimento</dt><dd>{s.dataNascimento ? new Date(s.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}{s.dataNascimento && <span className="crm-sub"> ({idadeLabel(s.dataNascimento)})</span>}</dd>
@@ -625,7 +625,7 @@ export default function AdminDPS() {
           type="search"
           className="admin-busca-input"
           style={{ paddingLeft: 40 }}
-          placeholder="Buscar por protocolo, titular, criança, plano, médica…"
+          placeholder="Buscar por protocolo, titular, beneficiário, plano, médica…"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
@@ -638,7 +638,7 @@ export default function AdminDPS() {
             <tr>
               <th>Protocolo</th>
               <th>Titular</th>
-              <th>Criança</th>
+              <th>Beneficiário</th>
               <th>Plano</th>
               <th>Consulta</th>
               <th>Médica</th>
@@ -706,7 +706,7 @@ export function __DPSPreview() {
         </div>
         <div className="crm-detalhe-grid">
           <section className="crm-bloco"><h4>Titular</h4><dl className="crm-dl"><dt>Nome</dt><dd>{s.nomeTitular}</dd><dt>Telefone</dt><dd>{s.telefoneTitular}</dd></dl></section>
-          <section className="crm-bloco"><h4>Criança</h4><dl className="crm-dl"><dt>Nome</dt><dd>{s.nomeCrianca}</dd><dt>Idade</dt><dd>{idadeLabel(s.dataNascimento)}</dd></dl></section>
+          <section className="crm-bloco"><h4>Beneficiário</h4><dl className="crm-dl"><dt>Nome</dt><dd>{s.nomeCrianca}</dd><dt>Idade</dt><dd>{idadeLabel(s.dataNascimento)}</dd></dl></section>
           <section className="crm-bloco"><h4>Contrato</h4><dl className="crm-dl"><dt>Plano</dt><dd>{s.tipoPlano}</dd><dt>Vigência</dt><dd>{s.vigencia ?? '—'}</dd></dl></section>
           <section className="crm-bloco"><h4>Consulta</h4><dl className="crm-dl"><dt>Médica</dt><dd>{s.medicaNome || '—'}</dd><dt>Data</dt><dd>{s.dataConsulta ? new Date(s.dataConsulta).toLocaleString('pt-BR') : '—'}</dd></dl></section>
         </div>
