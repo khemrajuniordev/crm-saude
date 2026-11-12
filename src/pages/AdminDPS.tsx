@@ -447,15 +447,16 @@ export default function AdminDPS() {
             </div>
 
             {/* Stepper */}
-            <div className="crm-stepper">
+            <div className="crm-steps">
               {ETAPAS_DPS.map((e, i) => {
                 const idx = ETAPAS_DPS.findIndex((x) => x.chave === s.status)
                 const feito = i < idx
                 const atual = i === idx
                 return (
-                  <div key={e.chave} className={`crm-step${feito ? ' feito' : ''}${atual ? ' atual' : ''}`}>
-                    <span className="crm-step-circulo">{feito ? '✓' : i + 1}</span>
-                    <span className="crm-step-label">{e.label}</span>
+                  <div key={e.chave} className={`crm-step${feito ? ' done' : ''}${atual ? ' active' : ''}`}>
+                    <span className="crm-step-b">{feito ? '✓' : i + 1}</span>
+                    <span className="crm-step-t">{e.label}</span>
+                    {i < ETAPAS_DPS.length - 1 && <span className="crm-step-ln" />}
                   </div>
                 )
               })}
