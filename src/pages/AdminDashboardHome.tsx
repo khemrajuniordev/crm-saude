@@ -58,6 +58,18 @@ function IconeCrm() {
   )
 }
 
+function IconeDPS() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="M9 12h6M9 16h4" />
+      <circle cx="17" cy="17" r="3" />
+      <path d="m19.5 19.5 1.5 1.5" />
+    </svg>
+  )
+}
+
 function IconeCases() {
   return (
     <svg
@@ -103,6 +115,13 @@ const OPCOES: {
     descricao:
       'Fluxo de CM entre atendimento, enfermagem e financeiro — abertura, autorização, agendamento e pagamento.',
     icone: <IconeCrm />,
+  },
+  {
+    to: ROUTES.adminDps,
+    titulo: 'Central DPS',
+    descricao:
+      'Controle de Declarações de Proposta de Saúde: cadastro, agendamento com médica avaliadora, parecer clínico e indicadores de aprovação.',
+    icone: <IconeDPS />,
   },
   {
     to: ROUTES.adminCases,
