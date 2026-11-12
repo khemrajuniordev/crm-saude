@@ -615,10 +615,16 @@ export default function AdminDPS() {
       </div>
 
       {/* Busca */}
-      <div className="crm-busca-wrap">
+      <div className="admin-busca-wrap" style={{ position: 'relative' }}>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8"
+          style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 17, height: 17, color: '#8a95af', pointerEvents: 'none' }}>
+          <circle cx="8.5" cy="8.5" r="5.5" />
+          <path d="m14 14 3 3" strokeLinecap="round" />
+        </svg>
         <input
           type="search"
-          className="crm-busca"
+          className="admin-busca-input"
+          style={{ paddingLeft: 40 }}
           placeholder="Buscar por protocolo, titular, criança, plano, médica…"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
