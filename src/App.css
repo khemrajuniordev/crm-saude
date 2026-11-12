@@ -5536,6 +5536,17 @@ button.crm-card:hover {
   filter: brightness(0.95);
 }
 
+/* ---- modal formulário DPS ---- */
+.dps-modal-form {
+  max-width: 760px;
+  padding: 24px;
+}
+.dps-modal-form .crm-form-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+}
+
 /* ---- modal nova solicitação ---- */
 .crm-modal {
   width: 100%;

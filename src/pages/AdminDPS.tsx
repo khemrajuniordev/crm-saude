@@ -313,107 +313,10 @@ export default function AdminDPS() {
   // ================================================================
   // Renderização do formulário (criar/editar)
   // ================================================================
-  if (criando || (editando && detalhe)) {
-    const titulo = criando ? 'Nova solicitação DPS' : 'Editar solicitação'
-    const fechar = () => { setCriando(false); setEditando(false) }
-    const salvar = criando ? salvarNovo : salvarEdicao
-    return (
-      <div className="crm">
-        <div className="crm-topo">
-          <h2 className="admin-secao-titulo">{titulo}</h2>
-          <button type="button" className="btn btn-ghost" onClick={fechar}>← Voltar</button>
-        </div>
-
-        {erroForm && <p className="erro admin-erro" role="alert">{erroForm}</p>}
-
-        <div className="crm-form-scroll">
-          <fieldset className="crm-fieldset">
-            <legend>Titular / Responsável</legend>
-            <div className="crm-campos">
-              <div className="campo">
-                <label>Nome completo <span className="crm-req">*</span></label>
-                <input value={form.nomeTitular} onChange={(e) => setForm((f) => ({ ...f, nomeTitular: e.target.value }))} />
-              </div>
-              <div className="campo">
-                <label>CPF / CNPJ</label>
-                <input value={form.cpfTitular} onChange={(e) => setForm((f) => ({ ...f, cpfTitular: mascaraDocumento(e.target.value) }))} placeholder="000.000.000-00" />
-              </div>
-              <div className="campo">
-                <label>Telefone</label>
-                <input value={form.telefoneTitular} onChange={(e) => setForm((f) => ({ ...f, telefoneTitular: mascaraTelefone(e.target.value) }))} placeholder="(69) 99999-0000" />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="crm-fieldset">
-            <legend>Beneficiário</legend>
-            <div className="crm-campos">
-              <div className="campo">
-                <label>Nome completo <span className="crm-req">*</span></label>
-                <input value={form.nomeCrianca} onChange={(e) => setForm((f) => ({ ...f, nomeCrianca: e.target.value }))} />
-              </div>
-              <div className="campo">
-                <label>Data de nascimento</label>
-                <input type="date" value={form.dataNascimento} onChange={(e) => setForm((f) => ({ ...f, dataNascimento: e.target.value }))} />
-              </div>
-              <div className="campo">
-                <label>CPF do beneficiário</label>
-                <input value={form.cpfCrianca} onChange={(e) => setForm((f) => ({ ...f, cpfCrianca: mascaraDocumento(e.target.value) }))} placeholder="000.000.000-00" />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="crm-fieldset">
-            <legend>Contrato</legend>
-            <div className="crm-campos">
-              <div className="campo">
-                <label>Tipo de plano <span className="crm-req">*</span></label>
-                <select value={form.tipoPlano} onChange={(e) => setForm((f) => ({ ...f, tipoPlano: e.target.value }))}>
-                  <option value="">Selecione…</option>
-                  {TIPOS_PLANO.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div className="campo">
-                <label>Vigência do contrato</label>
-                <input type="date" value={form.vigencia} onChange={(e) => setForm((f) => ({ ...f, vigencia: e.target.value }))} />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="crm-fieldset">
-            <legend>Agendamento (opcional ao criar)</legend>
-            <div className="crm-campos">
-              <div className="campo">
-                <label>Médica avaliadora</label>
-                <select
-                  value={form.medicaId}
-                  onChange={(e) => setForm((f) => ({ ...f, medicaId: e.target.value }))}
-                >
-                  <option value="">Selecione…</option>
-                  {medicas.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                </select>
-              </div>
-              <div className="campo">
-                <label>Data e hora da consulta</label>
-                <input
-                  type="datetime-local"
-                  value={form.dataConsulta}
-                  onChange={(e) => setForm((f) => ({ ...f, dataConsulta: e.target.value }))}
-                />
-              </div>
-            </div>
-          </fieldset>
-        </div>
-
-        <div className="crm-acoes-fixas">
-          <button type="button" className="btn btn-ghost" onClick={fechar} disabled={salvando}>Cancelar</button>
-          <button type="button" className="btn btn-primary" onClick={salvar} disabled={salvando}>
-            {salvando ? 'Salvando…' : 'Salvar'}
-          </button>
-        </div>
-      </div>
-    )
-  }
+  const mostrarFormModal = criando || (editando && !!detalhe)
+  const tituloForm = criando ? 'Nova solicitação DPS' : 'Editar solicitação'
+  const fecharForm = () => { setCriando(false); setEditando(false) }
+  const salvarForm = criando ? salvarNovo : salvarEdicao
 
   // ================================================================
   // Renderização do detalhe
@@ -681,6 +584,99 @@ export default function AdminDPS() {
 
       {toastErro && <ToastErro msg={toastErro} onClose={() => setToastErro('')} />}
       {toastOk  && <ToastOk  msg={toastOk}  onClose={() => setToastOk('')}  />}
+
+      {/* Modal de formulário */}
+      {mostrarFormModal && (
+        <div className="crm-overlay" role="dialog" aria-modal="true" onClick={fecharForm}>
+          <div className="crm-modal dps-modal-form" onClick={(e) => e.stopPropagation()}>
+            <div className="crm-topo" style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>{tituloForm}</h3>
+              <button type="button" className="btn btn-ghost" onClick={fecharForm}>✕</button>
+            </div>
+
+            {erroForm && <p className="erro admin-erro" role="alert" style={{ marginBottom: 12 }}>{erroForm}</p>}
+
+            <div className="crm-form-scroll">
+              <fieldset className="crm-fieldset">
+                <legend>Titular / Responsável</legend>
+                <div className="crm-campos">
+                  <div className="campo">
+                    <label>Nome completo <span className="crm-req">*</span></label>
+                    <input value={form.nomeTitular} onChange={(e) => setForm((f) => ({ ...f, nomeTitular: e.target.value }))} />
+                  </div>
+                  <div className="campo">
+                    <label>CPF / CNPJ</label>
+                    <input value={form.cpfTitular} onChange={(e) => setForm((f) => ({ ...f, cpfTitular: mascaraDocumento(e.target.value) }))} placeholder="000.000.000-00" />
+                  </div>
+                  <div className="campo">
+                    <label>Telefone</label>
+                    <input value={form.telefoneTitular} onChange={(e) => setForm((f) => ({ ...f, telefoneTitular: mascaraTelefone(e.target.value) }))} placeholder="(69) 99999-0000" />
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset className="crm-fieldset">
+                <legend>Beneficiário</legend>
+                <div className="crm-campos">
+                  <div className="campo">
+                    <label>Nome completo <span className="crm-req">*</span></label>
+                    <input value={form.nomeCrianca} onChange={(e) => setForm((f) => ({ ...f, nomeCrianca: e.target.value }))} />
+                  </div>
+                  <div className="campo">
+                    <label>Data de nascimento</label>
+                    <input type="date" value={form.dataNascimento} onChange={(e) => setForm((f) => ({ ...f, dataNascimento: e.target.value }))} />
+                  </div>
+                  <div className="campo">
+                    <label>CPF do beneficiário</label>
+                    <input value={form.cpfCrianca} onChange={(e) => setForm((f) => ({ ...f, cpfCrianca: mascaraDocumento(e.target.value) }))} placeholder="000.000.000-00" />
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset className="crm-fieldset">
+                <legend>Contrato</legend>
+                <div className="crm-campos">
+                  <div className="campo">
+                    <label>Tipo de plano <span className="crm-req">*</span></label>
+                    <select value={form.tipoPlano} onChange={(e) => setForm((f) => ({ ...f, tipoPlano: e.target.value }))}>
+                      <option value="">Selecione…</option>
+                      {TIPOS_PLANO.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div className="campo">
+                    <label>Vigência do contrato</label>
+                    <input type="date" value={form.vigencia} onChange={(e) => setForm((f) => ({ ...f, vigencia: e.target.value }))} />
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset className="crm-fieldset">
+                <legend>Agendamento (opcional ao criar)</legend>
+                <div className="crm-campos">
+                  <div className="campo">
+                    <label>Médica avaliadora</label>
+                    <select value={form.medicaId} onChange={(e) => setForm((f) => ({ ...f, medicaId: e.target.value }))}>
+                      <option value="">Selecione…</option>
+                      {medicas.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                    </select>
+                  </div>
+                  <div className="campo">
+                    <label>Data e hora da consulta</label>
+                    <input type="datetime-local" value={form.dataConsulta} onChange={(e) => setForm((f) => ({ ...f, dataConsulta: e.target.value }))} />
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+
+            <div className="crm-modal-acoes">
+              <button type="button" className="btn btn-ghost" onClick={fecharForm} disabled={salvando}>Cancelar</button>
+              <button type="button" className="btn btn-primary" onClick={salvarForm} disabled={salvando}>
+                {salvando ? 'Salvando…' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
