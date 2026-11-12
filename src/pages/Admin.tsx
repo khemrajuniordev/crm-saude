@@ -222,7 +222,7 @@ function AdminShell({ sessao }: { sessao: Session }) {
             <p className="admin-usuario">{sessao.user.email}</p>
           </div>
           <div className="admin-acoes-topo">
-            {!naRaiz && (
+            {!naRaiz && !naDps && (
               <Link className="btn btn-ghost" to={ROUTES.admin}>
                 ← Menu
               </Link>
