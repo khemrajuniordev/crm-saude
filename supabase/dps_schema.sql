@@ -7,6 +7,7 @@
 create table if not exists dps_perfis (
   id   uuid references auth.users on delete cascade primary key,
   nome text not null,
+  email text,
   papel text not null check (papel in ('admin', 'operador', 'medica')),
   ativo boolean not null default true,
   created_at timestamptz not null default now()

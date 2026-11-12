@@ -172,23 +172,42 @@ export async function checarConflitoAgenda(
 
 // ---- Perfis ----
 
-type LinhaPerfil = { id: string; nome: string; papel: PapelDPS; ativo: boolean }
+export type PerfilDPS = {
+  id: string
+  nome: string
+  email: string
+  papel: PapelDPS
+  ativo: boolean
+}
 
-export type PerfilDPS = LinhaPerfil
+async function invocarDpsUsuarios(
+  acao: string,
+  extra: Record<string, unknown> = {},
+): Promise<Record<string, unknown>> {
+  const client = sb()
+  const { data, error } = await client.functions.invoke('dps-usuarios', {
+    body: { acao, ...extra },
+  })
+  if (error) {
+    let msg = error.message
+    try {
+      const parsed = typeof data === 'string' ? JSON.parse(data) : data
+      if (parsed?.error) msg = parsed.error
+    } catch { /* mantém msg padrão */ }
+    throw new Error(msg)
+  }
+  return data as Record<string, unknown>
+}
 
 export async function listarPerfis(): Promise<PerfilDPS[]> {
-  const { data, error } = await sb()
-    .from('dps_perfis')
-    .select('id, nome, papel, ativo')
-    .order('nome')
-  if (error) throw error
-  return (data as LinhaPerfil[])
+  const data = await invocarDpsUsuarios('listar')
+  return (data.usuarios as PerfilDPS[]) ?? []
 }
 
 export async function listarMedicas(): Promise<PerfilDPS[]> {
   const { data, error } = await sb()
     .from('dps_perfis')
-    .select('id, nome, papel, ativo')
+    .select('id, nome, email, papel, ativo')
     .eq('papel', 'medica')
     .eq('ativo', true)
     .order('nome')
@@ -202,16 +221,35 @@ export async function meuPapelDPS(): Promise<PapelDPS | null> {
   return data as PapelDPS
 }
 
-export async function salvarPerfil(id: string, nome: string, papel: PapelDPS): Promise<void> {
-  const { error } = await sb()
-    .from('dps_perfis')
-    .upsert({ id, nome, papel, ativo: true }, { onConflict: 'id' })
-  if (error) throw error
+export async function meuIdDPS(): Promise<string | null> {
+  const { data: { user } } = await sb().auth.getUser()
+  return user?.id ?? null
 }
 
-export async function alternarAtivoPerfil(id: string, ativo: boolean): Promise<void> {
-  const { error } = await sb().from('dps_perfis').update({ ativo }).eq('id', id)
-  if (error) throw error
+export async function convidarUsuarioDPS(
+  nome: string,
+  email: string,
+  papel: PapelDPS,
+): Promise<PerfilDPS> {
+  const data = await invocarDpsUsuarios('convidar', { nome, email, papel })
+  return data.usuario as PerfilDPS
+}
+
+export async function atualizarUsuarioDPS(
+  user_id: string,
+  patch: Partial<{ papel: PapelDPS; ativo: boolean }>,
+): Promise<PerfilDPS> {
+  const data = await invocarDpsUsuarios('atualizar', { user_id, ...patch })
+  return data.usuario as PerfilDPS
+}
+
+export async function redefinirSenhaDPS(user_id: string): Promise<boolean> {
+  const data = await invocarDpsUsuarios('redefinir_senha', { user_id })
+  return Boolean(data.enviado)
+}
+
+export async function removerUsuarioDPS(user_id: string): Promise<void> {
+  await invocarDpsUsuarios('remover', { user_id })
 }
 
 export function assinarSolicitacoesDPS(cb: () => void): () => void {
