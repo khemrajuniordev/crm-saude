@@ -321,166 +321,10 @@ export default function AdminDPS() {
   // ================================================================
   // Renderização do detalhe
   // ================================================================
-  if (detalhe) {
-    const s = detalhe
-    const podeIniciarAvaliacao = ehMedica && s.status === 'agendado'
-    const podeEmitirParecer    = ehMedica && (s.status === 'agendado' || s.status === 'avaliacao')
-    const podeEditarSol        = podeEditar && s.status !== 'aprovado' && s.status !== 'reprovado'
-
-    return (
-      <div className="crm">
-        <div className="crm-topo">
-          <div>
-            <h2 className="admin-secao-titulo">{s.protocolo}</h2>
-            <Badge status={s.status} />
-          </div>
-          <div className="crm-topo-acoes">
-            {podeEditarSol && (
-              <button type="button" className="btn btn-ghost" onClick={() => abrirEdicao(s)}>✏️ Editar</button>
-            )}
-            <button type="button" className="btn btn-ghost" onClick={() => setDetalhe(null)}>← Voltar</button>
-          </div>
-        </div>
-
-        {/* Stepper */}
-        <div className="crm-stepper">
-          {ETAPAS_DPS.map((e, i) => {
-            const idx = ETAPAS_DPS.findIndex((x) => x.chave === s.status)
-            const feito = i < idx
-            const atual = i === idx
-            return (
-              <div key={e.chave} className={`crm-step${feito ? ' feito' : ''}${atual ? ' atual' : ''}`}>
-                <span className="crm-step-circulo">{feito ? '✓' : i + 1}</span>
-                <span className="crm-step-label">{e.label}</span>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Resultado: reprovado */}
-        {s.status === 'reprovado' && s.motivoReprovacao && (
-          <div className="crm-banner crm-banner-recusado">
-            <strong>Reprovado</strong> — {s.motivoReprovacao}
-          </div>
-        )}
-        {/* Resultado: aprovado */}
-        {s.status === 'aprovado' && (
-          <div className="crm-banner crm-banner-ok">
-            <strong>Aprovado</strong>{s.observacao ? ` — ${s.observacao}` : ''}
-          </div>
-        )}
-
-        {/* Dados */}
-        <div className="crm-detalhe-grid">
-          <section className="crm-bloco">
-            <h4>Titular / Responsável</h4>
-            <dl className="crm-dl">
-              <dt>Nome</dt><dd>{s.nomeTitular}</dd>
-              <dt>CPF</dt><dd>{s.cpfTitular || '—'}</dd>
-              <dt>Telefone</dt><dd>{s.telefoneTitular || '—'}</dd>
-            </dl>
-          </section>
-
-          <section className="crm-bloco">
-            <h4>Beneficiário</h4>
-            <dl className="crm-dl">
-              <dt>Nome</dt><dd>{s.nomeCrianca}</dd>
-              <dt>Nascimento</dt><dd>{s.dataNascimento ? new Date(s.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}{s.dataNascimento && <span className="crm-sub"> ({idadeLabel(s.dataNascimento)})</span>}</dd>
-              <dt>CPF</dt><dd>{s.cpfCrianca || '—'}</dd>
-            </dl>
-          </section>
-
-          <section className="crm-bloco">
-            <h4>Contrato</h4>
-            <dl className="crm-dl">
-              <dt>Tipo de plano</dt><dd>{s.tipoPlano}</dd>
-              <dt>Vigência</dt><dd>{s.vigencia ? new Date(s.vigencia + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</dd>
-            </dl>
-          </section>
-
-          <section className="crm-bloco">
-            <h4>Consulta DPS</h4>
-            <dl className="crm-dl">
-              <dt>Médica</dt><dd>{s.medicaNome || '—'}</dd>
-              <dt>Data / Hora</dt><dd>{s.dataConsulta ? new Date(s.dataConsulta).toLocaleString('pt-BR') : '—'}</dd>
-              <dt>Cadastrado em</dt><dd>{new Date(s.criadoEm).toLocaleDateString('pt-BR')}</dd>
-            </dl>
-          </section>
-        </div>
-
-        {/* Zona de ação — médica */}
-        {podeEmitirParecer && !avaliando && !reprovando && (
-          <div className="crm-zona-acao dps-zona-acao">
-            <p>Registre o parecer após a consulta:</p>
-            <div className="crm-acoes-row">
-              {podeIniciarAvaliacao && (
-                <button type="button" className="btn btn-ghost" onClick={iniciarAvaliacao} disabled={salvando}>
-                  Iniciar avaliação
-                </button>
-              )}
-              <button type="button" className="btn btn-primary" onClick={() => { setAvaliando(true); setObsForm(s.observacao) }}>
-                ✅ Aprovar
-              </button>
-              <button type="button" className="btn dps-btn-reprovar" onClick={() => setReprovando(true)}>
-                ✖ Reprovar
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de aprovação */}
-        {avaliando && !reprovando && (
-          <div className="crm-overlay">
-            <div className="crm-modal-sm dps-modal-parecer">
-              <h3>Aprovar solicitação</h3>
-              <div className="campo">
-                <label>Observações clínicas (opcional)</label>
-                <textarea rows={4} value={obsForm} onChange={(e) => setObsForm(e.target.value)} placeholder="Registre observações relevantes…" />
-              </div>
-              <div className="crm-modal-acoes">
-                <button type="button" className="btn btn-ghost" onClick={() => setAvaliando(false)} disabled={salvando}>Cancelar</button>
-                <button type="button" className="btn btn-primary" onClick={() => registrarAvaliacao('aprovado')} disabled={salvando}>
-                  {salvando ? 'Salvando…' : 'Confirmar aprovação'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de reprovação */}
-        {reprovando && (
-          <div className="crm-overlay">
-            <div className="crm-modal-sm dps-modal-parecer">
-              <h3>Reprovar solicitação</h3>
-              <div className={`campo${erroMotivo ? ' tem-erro' : ''}`}>
-                <label>Motivo da reprovação <span className="crm-req">*</span></label>
-                <textarea
-                  rows={4}
-                  value={motivoRep}
-                  onChange={(e) => { setMotivoRep(e.target.value); setErroMotivo('') }}
-                  placeholder="Descreva o motivo clínico…"
-                />
-                {erroMotivo && <span className="erro" role="alert">{erroMotivo}</span>}
-              </div>
-              <div className="campo">
-                <label>Observações adicionais (opcional)</label>
-                <textarea rows={3} value={obsForm} onChange={(e) => setObsForm(e.target.value)} />
-              </div>
-              <div className="crm-modal-acoes">
-                <button type="button" className="btn btn-ghost" onClick={() => { setReprovando(false); setErroMotivo('') }} disabled={salvando}>Cancelar</button>
-                <button type="button" className="btn dps-btn-reprovar" onClick={() => registrarAvaliacao('reprovado')} disabled={salvando}>
-                  {salvando ? 'Salvando…' : 'Confirmar reprovação'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {toastErro && <ToastErro msg={toastErro} onClose={() => setToastErro('')} />}
-        {toastOk  && <ToastOk  msg={toastOk}  onClose={() => setToastOk('')}  />}
-      </div>
-    )
-  }
+  const s = detalhe
+  const podeIniciarAvaliacao = !!s && ehMedica && s.status === 'agendado'
+  const podeEmitirParecer    = !!s && ehMedica && (s.status === 'agendado' || s.status === 'avaliacao')
+  const podeEditarSol        = !!s && podeEditar && s.status !== 'aprovado' && s.status !== 'reprovado'
 
   // ================================================================
   // Lista
@@ -584,6 +428,160 @@ export default function AdminDPS() {
 
       {toastErro && <ToastErro msg={toastErro} onClose={() => setToastErro('')} />}
       {toastOk  && <ToastOk  msg={toastOk}  onClose={() => setToastOk('')}  />}
+
+      {/* Drawer de detalhe */}
+      {s && !mostrarFormModal && (
+        <div className="crm-overlay" role="dialog" aria-modal="true" onClick={() => setDetalhe(null)}>
+          <aside className="crm-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="crm-drawer-topo">
+              <div>
+                <h3 className="crm-drawer-titulo">{s.protocolo}</h3>
+                <Badge status={s.status} />
+              </div>
+              <div className="crm-topo-acoes">
+                {podeEditarSol && (
+                  <button type="button" className="btn btn-ghost" onClick={() => abrirEdicao(s)}>✏️ Editar</button>
+                )}
+                <button type="button" className="btn btn-ghost crm-fechar" onClick={() => setDetalhe(null)} aria-label="Fechar">×</button>
+              </div>
+            </div>
+
+            {/* Stepper */}
+            <div className="crm-stepper">
+              {ETAPAS_DPS.map((e, i) => {
+                const idx = ETAPAS_DPS.findIndex((x) => x.chave === s.status)
+                const feito = i < idx
+                const atual = i === idx
+                return (
+                  <div key={e.chave} className={`crm-step${feito ? ' feito' : ''}${atual ? ' atual' : ''}`}>
+                    <span className="crm-step-circulo">{feito ? '✓' : i + 1}</span>
+                    <span className="crm-step-label">{e.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Resultado: reprovado */}
+            {s.status === 'reprovado' && s.motivoReprovacao && (
+              <div className="crm-banner crm-banner-recusado">
+                <strong>Reprovado</strong> — {s.motivoReprovacao}
+              </div>
+            )}
+            {/* Resultado: aprovado */}
+            {s.status === 'aprovado' && (
+              <div className="crm-banner crm-banner-ok">
+                <strong>Aprovado</strong>{s.observacao ? ` — ${s.observacao}` : ''}
+              </div>
+            )}
+
+            {/* Dados */}
+            <div className="crm-detalhe-grid">
+              <section className="crm-bloco">
+                <h4>Titular / Responsável</h4>
+                <dl className="crm-dl">
+                  <dt>Nome</dt><dd>{s.nomeTitular}</dd>
+                  <dt>CPF</dt><dd>{s.cpfTitular || '—'}</dd>
+                  <dt>Telefone</dt><dd>{s.telefoneTitular || '—'}</dd>
+                </dl>
+              </section>
+
+              <section className="crm-bloco">
+                <h4>Beneficiário</h4>
+                <dl className="crm-dl">
+                  <dt>Nome</dt><dd>{s.nomeCrianca}</dd>
+                  <dt>Nascimento</dt><dd>{s.dataNascimento ? new Date(s.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}{s.dataNascimento && <span className="crm-sub"> ({idadeLabel(s.dataNascimento)})</span>}</dd>
+                  <dt>CPF</dt><dd>{s.cpfCrianca || '—'}</dd>
+                </dl>
+              </section>
+
+              <section className="crm-bloco">
+                <h4>Contrato</h4>
+                <dl className="crm-dl">
+                  <dt>Tipo de plano</dt><dd>{s.tipoPlano}</dd>
+                  <dt>Vigência</dt><dd>{s.vigencia ? new Date(s.vigencia + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</dd>
+                </dl>
+              </section>
+
+              <section className="crm-bloco">
+                <h4>Consulta DPS</h4>
+                <dl className="crm-dl">
+                  <dt>Médica</dt><dd>{s.medicaNome || '—'}</dd>
+                  <dt>Data / Hora</dt><dd>{s.dataConsulta ? new Date(s.dataConsulta).toLocaleString('pt-BR') : '—'}</dd>
+                  <dt>Cadastrado em</dt><dd>{new Date(s.criadoEm).toLocaleDateString('pt-BR')}</dd>
+                </dl>
+              </section>
+            </div>
+
+            {/* Zona de ação — médica */}
+            {podeEmitirParecer && !avaliando && !reprovando && (
+              <div className="crm-zona-acao dps-zona-acao">
+                <p>Registre o parecer após a consulta:</p>
+                <div className="crm-acoes-row">
+                  {podeIniciarAvaliacao && (
+                    <button type="button" className="btn btn-ghost" onClick={iniciarAvaliacao} disabled={salvando}>
+                      Iniciar avaliação
+                    </button>
+                  )}
+                  <button type="button" className="btn btn-primary" onClick={() => { setAvaliando(true); setObsForm(s.observacao) }}>
+                    ✅ Aprovar
+                  </button>
+                  <button type="button" className="btn dps-btn-reprovar" onClick={() => setReprovando(true)}>
+                    ✖ Reprovar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Modal de aprovação */}
+            {avaliando && !reprovando && (
+              <div className="crm-overlay" onClick={() => setAvaliando(false)}>
+                <div className="crm-modal-sm dps-modal-parecer" onClick={(e) => e.stopPropagation()}>
+                  <h3>Aprovar solicitação</h3>
+                  <div className="campo">
+                    <label>Observações clínicas (opcional)</label>
+                    <textarea rows={4} value={obsForm} onChange={(e) => setObsForm(e.target.value)} placeholder="Registre observações relevantes…" />
+                  </div>
+                  <div className="crm-modal-acoes">
+                    <button type="button" className="btn btn-ghost" onClick={() => setAvaliando(false)} disabled={salvando}>Cancelar</button>
+                    <button type="button" className="btn btn-primary" onClick={() => registrarAvaliacao('aprovado')} disabled={salvando}>
+                      {salvando ? 'Salvando…' : 'Confirmar aprovação'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal de reprovação */}
+            {reprovando && (
+              <div className="crm-overlay" onClick={() => { setReprovando(false); setErroMotivo('') }}>
+                <div className="crm-modal-sm dps-modal-parecer" onClick={(e) => e.stopPropagation()}>
+                  <h3>Reprovar solicitação</h3>
+                  <div className={`campo${erroMotivo ? ' tem-erro' : ''}`}>
+                    <label>Motivo da reprovação <span className="crm-req">*</span></label>
+                    <textarea
+                      rows={4}
+                      value={motivoRep}
+                      onChange={(e) => { setMotivoRep(e.target.value); setErroMotivo('') }}
+                      placeholder="Descreva o motivo clínico…"
+                    />
+                    {erroMotivo && <span className="erro" role="alert">{erroMotivo}</span>}
+                  </div>
+                  <div className="campo">
+                    <label>Observações adicionais (opcional)</label>
+                    <textarea rows={3} value={obsForm} onChange={(e) => setObsForm(e.target.value)} />
+                  </div>
+                  <div className="crm-modal-acoes">
+                    <button type="button" className="btn btn-ghost" onClick={() => { setReprovando(false); setErroMotivo('') }} disabled={salvando}>Cancelar</button>
+                    <button type="button" className="btn dps-btn-reprovar" onClick={() => registrarAvaliacao('reprovado')} disabled={salvando}>
+                      {salvando ? 'Salvando…' : 'Confirmar reprovação'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
 
       {/* Modal de formulário */}
       {mostrarFormModal && (
