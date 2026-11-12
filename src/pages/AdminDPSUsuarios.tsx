@@ -5,10 +5,12 @@ import { type PapelDPS } from '../data/dps'
 import {
   atualizarUsuarioDPS,
   convidarUsuarioDPS,
+  contarPerfis,
   listarPerfis,
   meuIdDPS,
   meuPapelDPS,
   redefinirSenhaDPS,
+  registrarPrimeiroAdminDPS,
   removerUsuarioDPS,
   type PerfilDPS,
 } from '../data/dpsRepo'
@@ -31,7 +33,10 @@ export default function AdminDPSUsuarios() {
   const [erro, setErro]             = useState('')
   const [aviso, setAviso]           = useState('')
   const [meuId, setMeuId]           = useState<string | null>(null)
+  const [meuEmail, setMeuEmail]     = useState('')
   const [ocupado, setOcupado]       = useState<string | null>(null)
+  const [bootstrap, setBootstrap]   = useState(false)
+  const [bNome, setBNome]           = useState('')
 
   useEffect(() => {
     let vivo = true
@@ -44,9 +49,16 @@ export default function AdminDPSUsuarios() {
         if (p === 'admin') {
           const us = await listarPerfis()
           if (vivo) setLista(us)
+        } else if (!p) {
+          const total = await contarPerfis()
+          if (vivo && total === 0) setBootstrap(true)
+          // busca e-mail do usuário logado para pré-preencher
+          const { supabase: sb } = await import('../lib/supabase')
+          const { data: { user } } = await sb!.auth.getUser()
+          if (vivo && user?.email) setMeuEmail(user.email)
         }
       } catch (e) {
-        if (vivo) setErro('Falha ao carregar usuários: ' + String(e))
+        if (vivo) setErro('Falha ao carregar: ' + String(e))
       } finally {
         if (vivo) setCarregando(false)
       }
@@ -103,7 +115,48 @@ export default function AdminDPSUsuarios() {
     } finally { setSalvando(false) }
   }
 
+  async function registrarAdmin(e: FormEvent) {
+    e.preventDefault()
+    if (!meuId || !bNome.trim()) return
+    setErro(''); setSalvando(true)
+    try {
+      await registrarPrimeiroAdminDPS(meuId, bNome.trim(), meuEmail)
+      window.location.reload()
+    } catch (err) {
+      setErro('Erro ao registrar: ' + String(err))
+    } finally { setSalvando(false) }
+  }
+
   if (carregando) return <p className="admin-info">Carregando usuários…</p>
+
+  if (bootstrap) {
+    return (
+      <div className="crm">
+        <div className="crm-topo">
+          <h2 className="admin-secao-titulo">DPS · Usuários</h2>
+          <Link className="btn btn-ghost" to={ROUTES.adminDps}>← Voltar ao DPS</Link>
+        </div>
+        {erro && <div className="crm-toast-erro" role="alert"><span>{erro}</span></div>}
+        <div className="crm-bloco" style={{ maxWidth: 480 }}>
+          <h4>Registrar primeiro administrador</h4>
+          <p className="pnl-cap">Nenhum perfil cadastrado ainda. Registre-se como admin para começar.</p>
+          <form onSubmit={registrarAdmin}>
+            <div className="campo" style={{ marginBottom: 12 }}>
+              <label>Seu nome</label>
+              <input value={bNome} onChange={(e) => setBNome(e.target.value)} placeholder="Nome completo" required />
+            </div>
+            <div className="campo" style={{ marginBottom: 16 }}>
+              <label>E-mail</label>
+              <input value={meuEmail} readOnly style={{ background: 'var(--bg-alt)' }} />
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={salvando}>
+              {salvando ? 'Registrando…' : 'Registrar como Administrador'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
 
   if (papel !== 'admin') {
     return (

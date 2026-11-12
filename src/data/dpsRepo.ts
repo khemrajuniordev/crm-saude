@@ -226,6 +226,21 @@ export async function meuIdDPS(): Promise<string | null> {
   return user?.id ?? null
 }
 
+export async function registrarPrimeiroAdminDPS(id: string, nome: string, email: string): Promise<void> {
+  const { error } = await sb()
+    .from('dps_perfis')
+    .upsert({ id, nome, email, papel: 'admin', ativo: true }, { onConflict: 'id' })
+  if (error) throw error
+}
+
+export async function contarPerfis(): Promise<number> {
+  const { count, error } = await sb()
+    .from('dps_perfis')
+    .select('*', { count: 'exact', head: true })
+  if (error) throw error
+  return count ?? 0
+}
+
 export async function convidarUsuarioDPS(
   nome: string,
   email: string,

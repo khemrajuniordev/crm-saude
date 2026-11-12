@@ -207,6 +207,9 @@ function AdminShell({ sessao }: { sessao: Session }) {
   const naCrm = (
     [ROUTES.adminCrm, ROUTES.adminCrmUsuarios, ROUTES.adminCrmPainel] as string[]
   ).includes(location.pathname)
+  const naDps = (
+    [ROUTES.adminDps, ROUTES.adminDpsUsuarios, ROUTES.adminDpsPainel] as string[]
+  ).includes(location.pathname)
   const [trocarSenha, setTrocarSenha] = useState(false)
 
   return (
@@ -224,12 +227,12 @@ function AdminShell({ sessao }: { sessao: Session }) {
                 ← Menu
               </Link>
             )}
-            {!naRaiz && location.pathname !== ROUTES.adminRedes && !naCrm && (
+            {!naRaiz && location.pathname !== ROUTES.adminRedes && !naCrm && !naDps && (
               <Link className="btn btn-ghost" to={ROUTES.rede}>
                 Ver página pública
               </Link>
             )}
-            {!naCrm && (
+            {!naCrm && !naDps && (
               <button
                 type="button"
                 className="btn btn-ghost"
