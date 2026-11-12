@@ -5,9 +5,7 @@ import {
   etapaDPS,
   ETAPAS_DPS,
   FILTROS_DPS,
-  hojeISO,
   idadeLabel,
-  ROTULO_STATUS,
   SOLICITACOES_EXEMPLO,
   TIPOS_PLANO,
   type PapelDPS,
@@ -110,8 +108,8 @@ export default function AdminDPS() {
     let vivo = true
     ;(async () => {
       try {
-        const { supabase } = await import('../lib/supabase')
-        const { data: { user } } = await supabase.auth.getUser()
+        const { supabase: sb } = await import('../lib/supabase')
+        const { data: { user } } = await sb!.auth.getUser()
         const p = await meuPapelDPS()
         if (!vivo) return
         setPapel(p)
@@ -422,7 +420,6 @@ export default function AdminDPS() {
   // ================================================================
   if (detalhe) {
     const s = detalhe
-    const et = etapaDPS(s.status)
     const podeIniciarAvaliacao = ehMedica && s.status === 'agendado'
     const podeEmitirParecer    = ehMedica && (s.status === 'agendado' || s.status === 'avaliacao')
     const podeEditarSol        = podeEditar && s.status !== 'aprovado' && s.status !== 'reprovado'

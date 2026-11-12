@@ -2,7 +2,12 @@
  * Persistência do Central DPS no Supabase.
  * Tabela: dps_solicitacoes, dps_perfis (ver supabase/dps_schema.sql).
  */
-import { supabase } from '../lib/supabase'
+import { supabase as _supabase } from '../lib/supabase'
+
+function sb() {
+  if (!_supabase) throw new Error('Supabase não configurado')
+  return _supabase
+}
 import type { PapelDPS, SolicitacaoDPS, StatusDPS } from './dps'
 
 type LinhaDPS = {
@@ -52,7 +57,7 @@ function daLinha(l: LinhaDPS): SolicitacaoDPS {
 }
 
 export async function listarSolicitacoesDPS(): Promise<SolicitacaoDPS[]> {
-  const { data, error } = await supabase
+  const { data, error } = await sb()
     .from('dps_solicitacoes')
     .select('*')
     .order('created_at', { ascending: false })
@@ -61,7 +66,7 @@ export async function listarSolicitacoesDPS(): Promise<SolicitacaoDPS[]> {
 }
 
 export async function listarSolicitacoesMinhaAgendaDPS(medicaId: string): Promise<SolicitacaoDPS[]> {
-  const { data, error } = await supabase
+  const { data, error } = await sb()
     .from('dps_solicitacoes')
     .select('*')
     .eq('medica_id', medicaId)
@@ -74,8 +79,8 @@ export type NovaSolicitacaoDPS = Omit<SolicitacaoDPS,
   'id' | 'protocolo' | 'criadoEm' | 'atualizadoEm' | 'criadoPor'>
 
 export async function criarSolicitacaoDPS(s: NovaSolicitacaoDPS): Promise<SolicitacaoDPS> {
-  const { data: { user } } = await supabase.auth.getUser()
-  const { data, error } = await supabase
+  const { data: { user } } = await sb().auth.getUser()
+  const { data, error } = await sb()
     .from('dps_solicitacoes')
     .insert({
       protocolo: '',
@@ -134,12 +139,12 @@ export async function atualizarSolicitacaoDPS(id: string, patch: PatchDPS): Prom
   if (patch.status          != null) campos.status               = patch.status
   if (patch.observacao      != null) campos.observacao           = patch.observacao
   if (patch.motivoReprovacao != null) campos.motivo_reprovacao   = patch.motivoReprovacao
-  const { error } = await supabase.from('dps_solicitacoes').update(campos).eq('id', id)
+  const { error } = await sb().from('dps_solicitacoes').update(campos).eq('id', id)
   if (error) throw error
 }
 
 export async function excluirSolicitacaoDPS(id: string): Promise<void> {
-  const { error } = await supabase.from('dps_solicitacoes').delete().eq('id', id)
+  const { error } = await sb().from('dps_solicitacoes').delete().eq('id', id)
   if (error) throw error
 }
 
@@ -152,7 +157,7 @@ export async function checarConflitoAgenda(
   const dt = new Date(dataConsulta)
   const ini = new Date(dt.getTime() - 30 * 60000).toISOString()
   const fim = new Date(dt.getTime() + 30 * 60000).toISOString()
-  let q = supabase
+  let q = sb()
     .from('dps_solicitacoes')
     .select('id')
     .eq('medica_id', medicaId)
@@ -172,7 +177,7 @@ type LinhaPerfil = { id: string; nome: string; papel: PapelDPS; ativo: boolean }
 export type PerfilDPS = LinhaPerfil
 
 export async function listarPerfis(): Promise<PerfilDPS[]> {
-  const { data, error } = await supabase
+  const { data, error } = await sb()
     .from('dps_perfis')
     .select('id, nome, papel, ativo')
     .order('nome')
@@ -181,7 +186,7 @@ export async function listarPerfis(): Promise<PerfilDPS[]> {
 }
 
 export async function listarMedicas(): Promise<PerfilDPS[]> {
-  const { data, error } = await supabase
+  const { data, error } = await sb()
     .from('dps_perfis')
     .select('id, nome, papel, ativo')
     .eq('papel', 'medica')
@@ -192,27 +197,28 @@ export async function listarMedicas(): Promise<PerfilDPS[]> {
 }
 
 export async function meuPapelDPS(): Promise<PapelDPS | null> {
-  const { data, error } = await supabase.rpc('dps_papel')
+  const { data, error } = await sb().rpc('dps_papel')
   if (error || !data) return null
   return data as PapelDPS
 }
 
 export async function salvarPerfil(id: string, nome: string, papel: PapelDPS): Promise<void> {
-  const { error } = await supabase
+  const { error } = await sb()
     .from('dps_perfis')
     .upsert({ id, nome, papel, ativo: true }, { onConflict: 'id' })
   if (error) throw error
 }
 
 export async function alternarAtivoPerfil(id: string, ativo: boolean): Promise<void> {
-  const { error } = await supabase.from('dps_perfis').update({ ativo }).eq('id', id)
+  const { error } = await sb().from('dps_perfis').update({ ativo }).eq('id', id)
   if (error) throw error
 }
 
 export function assinarSolicitacoesDPS(cb: () => void): () => void {
-  const ch = supabase
+  const client = sb()
+  const ch = client
     .channel('dps-realtime')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'dps_solicitacoes' }, cb)
     .subscribe()
-  return () => { void supabase.removeChannel(ch) }
+  return () => { void client.removeChannel(ch) }
 }
