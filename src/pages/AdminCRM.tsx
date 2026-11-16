@@ -856,6 +856,9 @@ function DetalheSolicitacao({
       dataAutorizacao: hojeISO(),
       motivoRecusa: null,
       motivoAutorizacao: m,
+      // se a recusa veio do financeiro (statusFinanceiro 'Recusado'), tira
+      // desse estado para a solicitação voltar ao fluxo (só admin alcança isto)
+      ...(s.statusFinanceiro === 'Recusado' ? { statusFinanceiro: null } : {}),
     })
     setReautorizando(false)
   }
@@ -1034,7 +1037,7 @@ function DetalheSolicitacao({
                 </div>
               )}
             </div>
-            {podeEditarEnfermagem(papel) && s.autorizacao === 'nao' && (
+            {((podeEditarEnfermagem(papel) && s.autorizacao === 'nao') || papel === 'admin') && (
               <div className="crm-acao">
                 <div className="crm-acao-lbl">
                   Mudou a decisão? É possível autorizar informando o motivo.
