@@ -9,7 +9,8 @@ import ApppromoModal from './AppPromoModal'
 function Layout() {
   const { pathname } = useLocation()
 
-  /* Cada navegacao comeca no topo, e nao na posicao herdada da rota anterior */
+  /* Cada navegacao comeca no topo, e nao na posicao herdada da rota anterior 
+  por que nao consigo comegar nada*/
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
@@ -20,13 +21,13 @@ function Layout() {
 
       <main>
         <Outlet />
-      </main>
+      </main> 
 
       <SiteFooter />
 
       <CookieConsent />
 
-      <ApppromoModal />
+      <ApppromoModal /> 
 
       
     </div>
