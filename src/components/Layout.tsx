@@ -25,7 +25,7 @@ function Layout() {
 
       <CookieConsent />
 
-      <AppPromoModal />
+      {/* <AppPromoModal /> */}
     </div>
   )
 }
