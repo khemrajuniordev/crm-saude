@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import SiteHeader from './SiteHeader'
 import SiteFooter from './SiteFooter'
 import CookieConsent from './CookieConsent'
+import ApppromoModal from './AppPromoModal'
 
 
 function Layout() {
@@ -24,6 +25,8 @@ function Layout() {
       <SiteFooter />
 
       <CookieConsent />
+
+      <ApppromoModal />
 
       
     </div>

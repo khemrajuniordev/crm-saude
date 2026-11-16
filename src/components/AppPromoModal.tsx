@@ -60,7 +60,7 @@ function AppPromoModal() {
         <img
           className="promo-img"
           src={comunicado}
-          alt="Comunicado oficial: a sede de Porto Velho estará sem atendimento presencial de 9 a 13 de novembro. O atendimento será retomado em 16 de novembro."
+          alt="Comunicado oficial: a sede de Porto Velho estará sem atendimento presencial de 16 a 19 de novembro. O atendimento será retomado em 23 de novembro."
         />
 
         <div className="promo-actions">
