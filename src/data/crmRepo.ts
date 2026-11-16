@@ -24,6 +24,7 @@ type LinhaCRM = {
   autorizacao: SolicitacaoCRM['autorizacao']
   data_autorizacao: string | null
   motivo_recusa: string | null
+  motivo_autorizacao: string | null
   data_prevista_pagamento: string | null
   status_financeiro: SolicitacaoCRM['statusFinanceiro']
   data_pagamento: string | null
@@ -49,6 +50,7 @@ function daLinha(l: LinhaCRM): SolicitacaoCRM {
     autorizacao: l.autorizacao,
     dataAutorizacao: l.data_autorizacao,
     motivoRecusa: l.motivo_recusa ?? null,
+    motivoAutorizacao: l.motivo_autorizacao ?? null,
     dataPrevistaPagamento: l.data_prevista_pagamento,
     statusFinanceiro: l.status_financeiro,
     dataPagamento: l.data_pagamento,
@@ -181,6 +183,7 @@ type PatchCRM = Partial<{
   autorizacao: SolicitacaoCRM['autorizacao']
   dataAutorizacao: string | null
   motivoRecusa: string | null
+  motivoAutorizacao: string | null
   // financeiro
   dataPrevistaPagamento: string | null
   statusFinanceiro: SolicitacaoCRM['statusFinanceiro']
@@ -211,6 +214,7 @@ export async function atualizarSolicitacao(
   if ('autorizacao' in patch) col.autorizacao = patch.autorizacao
   if ('dataAutorizacao' in patch) col.data_autorizacao = patch.dataAutorizacao
   if ('motivoRecusa' in patch) col.motivo_recusa = patch.motivoRecusa
+  if ('motivoAutorizacao' in patch) col.motivo_autorizacao = patch.motivoAutorizacao
   if ('dataPrevistaPagamento' in patch) col.data_prevista_pagamento = patch.dataPrevistaPagamento
   if ('statusFinanceiro' in patch) col.status_financeiro = patch.statusFinanceiro
   if ('dataPagamento' in patch) col.data_pagamento = patch.dataPagamento
