@@ -842,6 +842,23 @@ function DetalheSolicitacao({
     onAtualizar(s.id, { autorizacao: 'nao', dataAutorizacao: hojeISO(), motivoRecusa: m })
     setRecusando(false)
   }
+  const [reautorizando, setReautorizando] = useState(false)
+  const [motivoReaut, setMotivoReaut] = useState('')
+  const [erroReaut, setErroReaut] = useState('')
+  const confirmarReautorizacao = () => {
+    const m = motivoReaut.trim()
+    if (!m) {
+      setErroReaut('Informe o motivo da autorização.')
+      return
+    }
+    onAtualizar(s.id, {
+      autorizacao: 'sim',
+      dataAutorizacao: hojeISO(),
+      motivoRecusa: null,
+      motivoAutorizacao: m,
+    })
+    setReautorizando(false)
+  }
   const [dataPrev, setDataPrev] = useState(s.dataPrevistaPagamento ?? '')
   const [status, setStatus] = useState<StatusFinanceiro>(s.statusFinanceiro ?? 'Pendente')
 
@@ -1008,14 +1025,36 @@ function DetalheSolicitacao({
           ))}
 
         {et.chave === 'recusado' && (
-          <div className="crm-acao-crit">
-            Não autorizado{s.dataAutorizacao ? ` em ${formatarData(s.dataAutorizacao)}` : ''}.
-            {s.motivoRecusa && (
-              <div className="crm-motivo-rec">
-                <strong>Motivo:</strong> {s.motivoRecusa}
+          <>
+            <div className="crm-acao-crit">
+              Não autorizado{s.dataAutorizacao ? ` em ${formatarData(s.dataAutorizacao)}` : ''}.
+              {s.motivoRecusa && (
+                <div className="crm-motivo-rec">
+                  <strong>Motivo:</strong> {s.motivoRecusa}
+                </div>
+              )}
+            </div>
+            {podeEditarEnfermagem(papel) && s.autorizacao === 'nao' && (
+              <div className="crm-acao">
+                <div className="crm-acao-lbl">
+                  Mudou a decisão? É possível autorizar informando o motivo.
+                </div>
+                <div className="crm-acoes">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setMotivoReaut('')
+                      setErroReaut('')
+                      setReautorizando(true)
+                    }}
+                  >
+                    Autorizar mesmo assim
+                  </button>
+                </div>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {(et.chave === 'financeiro' || et.chave === 'agendado') && (
@@ -1023,6 +1062,11 @@ function DetalheSolicitacao({
             <p className="crm-acao-nota crm-ok">
               ✓ Autorizado{s.dataAutorizacao ? ` em ${formatarData(s.dataAutorizacao)}` : ''}
             </p>
+            {s.motivoAutorizacao && (
+              <div className="crm-motivo-rec">
+                <strong>Motivo da autorização:</strong> {s.motivoAutorizacao}
+              </div>
+            )}
             {podeEditarFinanceiro(papel) ? (
               <div className="crm-acao">
                 <div className="crm-acao-lbl">Pagamento</div>
@@ -1372,6 +1416,55 @@ function DetalheSolicitacao({
               </button>
               <button type="button" className="btn btn-primary crm-btn-recusar-conf" onClick={confirmarRecusa}>
                 Confirmar recusa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reautorizando && (
+        <div className="crm-overlay crm-overlay-top" role="dialog" aria-modal="true">
+          <div className="crm-modal crm-modal-sm">
+            <div className="crm-modal-head">
+              <div>
+                <h3>Autorizar solicitação</h3>
+                <p className="crm-modal-sub">
+                  Esta solicitação havia sido recusada. Informe o motivo para autorizá-la agora.
+                </p>
+              </div>
+              <button type="button" className="crm-fechar" onClick={() => setReautorizando(false)} aria-label="Fechar">
+                ×
+              </button>
+            </div>
+            <div className="crm-modal-corpo">
+              <div className="campo">
+                <label htmlFor="motivo-reaut">
+                  Motivo da autorização <span className="crm-req">*</span>
+                </label>
+                <textarea
+                  id="motivo-reaut"
+                  rows={4}
+                  autoFocus
+                  value={motivoReaut}
+                  onChange={(e) => {
+                    setMotivoReaut(e.target.value)
+                    if (erroReaut) setErroReaut('')
+                  }}
+                  placeholder="Ex.: Documentação complementada; procedimento reavaliado e dentro da cobertura…"
+                />
+                {erroReaut && (
+                  <span className="erro" role="alert">
+                    {erroReaut}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="crm-modal-acoes">
+              <button type="button" className="btn btn-ghost" onClick={() => setReautorizando(false)}>
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-primary" onClick={confirmarReautorizacao}>
+                Confirmar autorização
               </button>
             </div>
           </div>

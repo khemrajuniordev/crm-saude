@@ -81,6 +81,7 @@ export type SolicitacaoCRM = {
   autorizacao: Autorizacao
   dataAutorizacao: string | null
   motivoRecusa: string | null
+  motivoAutorizacao: string | null
 
   /* ---- Financeiro ---- */
   dataPrevistaPagamento: string | null
@@ -348,6 +349,7 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     autorizacao: 'sim',
     dataAutorizacao: '2026-10-08',
     motivoRecusa: null,
+    motivoAutorizacao: null,
     dataPrevistaPagamento: '2026-10-09',
     statusFinanceiro: 'Agendado',
     dataPagamento: null,
@@ -371,6 +373,7 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     autorizacao: 'nao',
     dataAutorizacao: '2026-09-16',
     motivoRecusa: null,
+    motivoAutorizacao: null,
     dataPrevistaPagamento: null,
     statusFinanceiro: 'Recusado',
     dataPagamento: null,
@@ -394,6 +397,7 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     autorizacao: 'pendente',
     dataAutorizacao: null,
     motivoRecusa: null,
+    motivoAutorizacao: null,
     dataPrevistaPagamento: null,
     statusFinanceiro: null,
     dataPagamento: null,
@@ -417,6 +421,7 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     autorizacao: 'sim',
     dataAutorizacao: '2026-10-12',
     motivoRecusa: null,
+    motivoAutorizacao: null,
     dataPrevistaPagamento: '2026-10-05',
     statusFinanceiro: 'Pago',
     dataPagamento: '2026-10-05',
@@ -440,6 +445,7 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     autorizacao: 'sim',
     dataAutorizacao: '2026-10-13',
     motivoRecusa: null,
+    motivoAutorizacao: null,
     dataPrevistaPagamento: null,
     statusFinanceiro: 'Pendente',
     dataPagamento: null,
