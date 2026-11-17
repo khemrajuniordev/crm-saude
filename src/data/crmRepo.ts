@@ -11,6 +11,7 @@ import {
 } from './crm'
 
 const SOLICITACOES_KEY = 'crm-demo-solicitacoes-v1'
+const SOLICITACOES_SEMENTE_VERSION_KEY = 'crm-demo-solicitacoes-semente-v2'
 const USUARIOS_KEY = 'crm-demo-usuarios-v1'
 const ANEXOS_KEY = 'crm-demo-anexos-v1'
 const HISTORICO_KEY = 'crm-demo-historico-v1'
@@ -72,7 +73,18 @@ export async function meuNome(): Promise<string> {
 }
 
 export async function listarSolicitacoes(): Promise<SolicitacaoCRM[]> {
-  return ler(SOLICITACOES_KEY, SOLICITACOES_EXEMPLO)
+  const atuais = ler<SolicitacaoCRM[]>(SOLICITACOES_KEY, SOLICITACOES_EXEMPLO)
+  if (localStorage.getItem(SOLICITACOES_SEMENTE_VERSION_KEY) === '2') return atuais
+
+  const idsAtuais = new Set(atuais.map((solicitacao) => solicitacao.id))
+  const faltantes = SOLICITACOES_EXEMPLO.filter(
+    (solicitacao) => !idsAtuais.has(solicitacao.id),
+  )
+  const migradas = [...atuais, ...faltantes]
+
+  if (faltantes.length > 0) gravar(SOLICITACOES_KEY, migradas)
+  localStorage.setItem(SOLICITACOES_SEMENTE_VERSION_KEY, '2')
+  return migradas
 }
 
 export type NovaSolicitacao = {

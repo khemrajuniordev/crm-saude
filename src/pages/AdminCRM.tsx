@@ -50,13 +50,14 @@ import {
 const FILTROS = [
   { chave: 'todos', label: 'Todas', tom: '' },
   { chave: 'tipo-reembolso', label: 'Reembolsos', tom: '' },
-  { chave: 'consultas', label: '⏰ Próximas consultas', tom: '' },
+  { chave: 'consultas', label: 'Próximas consultas', tom: '' },
   { chave: 'enfermagem', label: 'Aguardando enfermagem', tom: 'aguardando' },
   { chave: 'financeiro', label: 'Aguardando financeiro', tom: 'analise' },
   { chave: 'agendado', label: 'Agendado', tom: 'agendado' },
   { chave: 'pago', label: 'Pago', tom: 'ok' },
   { chave: 'recusado', label: 'Não autorizado', tom: 'recusado' },
 ] as const
+const SOLICITACOES_POR_PAGINA = 10
 
 type FormNova = {
   tipo: TipoSolicitacao
@@ -95,6 +96,7 @@ export default function AdminCRM() {
   const [erro, setErro] = useState('')
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<string>('todos')
+  const [paginaAtual, setPaginaAtual] = useState(1)
   const [selecionada, setSelecionada] = useState<SolicitacaoCRM | null>(null)
   const [form, setForm] = useState<FormNova | null>(null)
   const [nomeAtendente, setNomeAtendente] = useState('')
@@ -209,6 +211,17 @@ export default function AdminCRM() {
     return r
   }, [lista, busca, filtro])
 
+  useEffect(() => {
+    setPaginaAtual(1)
+  }, [busca, filtro])
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrada.length / SOLICITACOES_POR_PAGINA))
+  const paginaVisivel = Math.min(paginaAtual, totalPaginas)
+  const solicitacoesPagina = filtrada.slice(
+    (paginaVisivel - 1) * SOLICITACOES_POR_PAGINA,
+    paginaVisivel * SOLICITACOES_POR_PAGINA,
+  )
+
   /* ---- mutações locais ---- */
   const atualizar = async (id: string, patch: Partial<SolicitacaoCRM>) => {
     setErro('')
@@ -262,13 +275,14 @@ export default function AdminCRM() {
       }
       // Evita duplicar se a outra aba já refletiu esta solicitação.
       setLista((atual) => [nova, ...atual.filter((s) => s.id !== nova.id)])
+      setPaginaAtual(1)
       setForm(null)
     } catch (err) {
       setErro('Não foi possível criar a solicitação: ' + mensagemErro(err))
     }
   }
 
-  if (carregando) return <p className="admin-info">Carregando CRM…</p>
+  if (carregando) return <p className="admin-info" role="status">Carregando CRM…</p>
 
   if (!papel) {
     return (
@@ -286,16 +300,21 @@ export default function AdminCRM() {
   return (
     <div className="crm">
       <div className="crm-topo">
-        <h2 className="admin-secao-titulo">Controle de CRM</h2>
+        <div>
+          <h2 className="admin-secao-titulo">Solicitações</h2>
+          <p className="crm-topo-descricao">Acompanhe e gerencie as solicitações do CRM.</p>
+        </div>
         <div className="crm-topo-acoes">
-          <Link className="btn btn-ghost" to={ROUTES.adminCrmPainel}>
-            Dashboard
-          </Link>
-          {papel === 'admin' && (
-            <Link className="btn btn-ghost" to={ROUTES.adminCrmUsuarios}>
-              Usuários
+          <nav className="crm-nav-links" aria-label="Navegação do CRM">
+            <Link className="btn btn-ghost" to={ROUTES.adminCrmPainel}>
+              Painel
             </Link>
-          )}
+            {papel === 'admin' && (
+              <Link className="btn btn-ghost" to={ROUTES.adminCrmUsuarios}>
+                Usuários
+              </Link>
+            )}
+          </nav>
           <span className="crm-papel-badge">{PAPEL_LABEL[papel]}</span>
         </div>
       </div>
@@ -311,11 +330,21 @@ export default function AdminCRM() {
 
       {/* ---------- cards ---------- */}
       <div className="crm-cards">
-        <button className="crm-card" type="button" onClick={() => setFiltro('enfermagem')}>
+        <button
+          className={`crm-card${filtro === 'enfermagem' ? ' ativo' : ''}`}
+          type="button"
+          onClick={() => setFiltro('enfermagem')}
+          aria-pressed={filtro === 'enfermagem'}
+        >
           <span className="crm-card-num">{metricas.enfermagem}</span>
           <span className="crm-card-rot">Aguardando enfermagem</span>
         </button>
-        <button className="crm-card" type="button" onClick={() => setFiltro('financeiro')}>
+        <button
+          className={`crm-card${filtro === 'financeiro' ? ' ativo' : ''}`}
+          type="button"
+          onClick={() => setFiltro('financeiro')}
+          aria-pressed={filtro === 'financeiro'}
+        >
           <span className="crm-card-num">{metricas.financeiro}</span>
           <span className="crm-card-rot">Aguardando financeiro</span>
         </button>
@@ -330,10 +359,14 @@ export default function AdminCRM() {
       </div>
 
       {/* ---------- barra ---------- */}
-      <div className="admin-barra">
+      <div className="crm-lista-toolbar">
         <p className="rede-contagem">
           <strong>{filtrada.length}</strong>
-          {busca.trim() || filtro !== 'todos' ? ` de ${lista.length}` : ''} solicitações
+          {busca.trim() || filtro !== 'todos'
+            ? ` de ${lista.length} solicitações`
+            : filtrada.length === 1
+              ? ' solicitação'
+              : ' solicitações'}
         </p>
         {podeEditarAtendimento(papel) && (
           <button
@@ -346,24 +379,46 @@ export default function AdminCRM() {
         )}
       </div>
 
-      <div className="crm-filtros">
-        {FILTROS.map((f) => (
-          <button
-            key={f.chave}
-            type="button"
-            className={`crm-chip${f.tom ? ` tom-${f.tom}` : ''}${filtro === f.chave ? ' ativo' : ''}`}
-            onClick={() => setFiltro(f.chave)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <section className="crm-filtros-secao" aria-label="Filtros de solicitações">
+        <div className="crm-filtros-cabecalho">
+          <span className="crm-filtros-titulo">Filtrar solicitações</span>
+          {(busca.trim() || filtro !== 'todos') && (
+            <button
+              type="button"
+              className="crm-filtros-limpar"
+              onClick={() => {
+                setBusca('')
+                setFiltro('todos')
+              }}
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+        <div className="crm-filtros" role="group" aria-label="Etapa da solicitação">
+          {FILTROS.map((f) => (
+            <button
+              key={f.chave}
+              type="button"
+              className={`crm-chip${f.tom ? ` tom-${f.tom}` : ''}${filtro === f.chave ? ' ativo' : ''}`}
+              onClick={() => setFiltro(f.chave)}
+              aria-pressed={filtro === f.chave}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </section>
 
-      <div className="admin-busca-wrap">
+      <div className="crm-busca">
+        <label className="crm-busca-label" htmlFor="crm-busca">
+          Buscar solicitações
+        </label>
         <input
+          id="crm-busca"
           type="search"
           className="admin-busca-input"
-          placeholder="Buscar por protocolo, paciente, solicitante, procedimento…"
+          placeholder="Protocolo, paciente, solicitante ou procedimento"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
@@ -386,11 +441,11 @@ export default function AdminCRM() {
             {filtrada.length === 0 && (
               <tr>
                 <td colSpan={6} className="admin-td-vazio">
-                  Nenhuma solicitação encontrada.
+                  <span>Nenhuma solicitação encontrada.</span>
                 </td>
               </tr>
             )}
-            {filtrada.map((s) => {
+            {solicitacoesPagina.map((s) => {
               const et = etapaAtual(s)
               const u = urgenciaConsulta(s)
               return (
@@ -432,6 +487,28 @@ export default function AdminCRM() {
           </tbody>
         </table>
       </div>
+
+      <nav className="crm-paginacao" aria-label="Paginação das solicitações">
+        <button
+          type="button"
+          className="crm-paginacao-btn"
+          onClick={() => setPaginaAtual(paginaVisivel - 1)}
+          disabled={paginaVisivel <= 1}
+        >
+          Anterior
+        </button>
+        <span className="crm-paginacao-contador" aria-live="polite">
+          Página {paginaVisivel} de {totalPaginas}
+        </span>
+        <button
+          type="button"
+          className="crm-paginacao-btn"
+          onClick={() => setPaginaAtual(paginaVisivel + 1)}
+          disabled={paginaVisivel >= totalPaginas}
+        >
+          Próxima
+        </button>
+      </nav>
 
       {/* ---------- modal nova solicitação ---------- */}
       {form && (

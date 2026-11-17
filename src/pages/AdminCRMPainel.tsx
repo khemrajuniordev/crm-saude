@@ -209,7 +209,7 @@ export default function AdminCRMPainel() {
   const m = useMemo(() => calcular(lista.filter((s) => noPeriodo(s, periodo))), [lista, periodo])
   const alertas = useMemo(() => calcularAlertas(lista, idsDoc), [lista, idsDoc])
 
-  if (carregando) return <p className="admin-info">Carregando painel…</p>
+  if (carregando) return <p className="admin-info" role="status">Carregando painel…</p>
 
   if (!papel) {
     return (
@@ -242,7 +242,10 @@ export default function AdminCRMPainel() {
   return (
     <div className="crm pnl">
       <div className="crm-topo">
-        <h2 className="admin-secao-titulo">Dashboard do CRM</h2>
+        <div>
+          <h2 className="admin-secao-titulo">Dashboard do CRM</h2>
+          <p className="crm-topo-descricao">Indicadores, alertas e tendências das solicitações.</p>
+        </div>
         <div className="crm-topo-acoes">
           <div className="pnl-periodo" role="group" aria-label="Período">
             {PERIODOS.map((p) => (

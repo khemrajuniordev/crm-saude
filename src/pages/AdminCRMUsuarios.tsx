@@ -123,7 +123,7 @@ export default function AdminCRMUsuarios() {
     }
   }
 
-  if (carregando) return <p className="admin-info">Carregando usuários…</p>
+  if (carregando) return <p className="admin-info" role="status">Carregando usuários…</p>
 
   if (papel !== 'admin') {
     return (
@@ -137,7 +137,10 @@ export default function AdminCRMUsuarios() {
   return (
     <div className="crm">
       <div className="crm-topo">
-        <h2 className="admin-secao-titulo">CRM · Usuários</h2>
+        <div>
+          <h2 className="admin-secao-titulo">CRM · Usuários</h2>
+          <p className="crm-topo-descricao">Gerencie os acessos e os perfis da demonstração.</p>
+        </div>
         <Link className="btn btn-ghost" to={ROUTES.adminCrm}>
           ← Voltar ao CRM
         </Link>

@@ -332,6 +332,60 @@ function dataExemplo(diasAtras: number): string {
 }
 
 /* Todos os nomes, identificadores e chaves abaixo são fictícios. */
+const solicitacoesDemoAdicionais: SolicitacaoCRM[] = Array.from({ length: 15 }, (_, indice) => {
+  const numero = indice + 6
+  const cenario = numero % 5
+  const tipo: TipoSolicitacao = numero % 4 === 0 ? 'reembolso' : 'consulta'
+  const autorizacao: Autorizacao =
+    cenario === 0 ? 'pendente' : cenario === 4 ? 'nao' : 'sim'
+  const statusFinanceiro: StatusFinanceiro | null =
+    cenario === 0
+      ? null
+      : cenario === 1
+        ? 'Pendente'
+        : cenario === 2
+          ? 'Agendado'
+          : cenario === 3
+            ? 'Pago'
+            : 'Recusado'
+  const solicitantes = ['ALEX DEMONSTRAÇÃO', 'BIA DEMONSTRAÇÃO', 'CAIO DEMONSTRAÇÃO']
+  const procedimentos = [
+    'CONSULTA DE ACOMPANHAMENTO',
+    'EXAME DEMONSTRATIVO',
+    'SESSÃO DE FISIOTERAPIA',
+    'PROCEDIMENTO DE EXEMPLO',
+    'REEMBOLSO DE DESPESA',
+  ]
+  const locais = ['CLÍNICA MODELO', 'CENTRO FICTÍCIO DE SAÚDE', 'PRESTADOR FICTÍCIO']
+  const dataPagamento = statusFinanceiro === 'Pago' ? dataExemplo(1 + (numero % 20)) : null
+
+  return {
+    id: `demo-${numero}`,
+    protocolo: `CRM-${new Date().getFullYear()}-${String(numero).padStart(5, '0')}`,
+    tipo,
+    abertura: dataExemplo(1 + (numero % 45)),
+    termino: dataPagamento,
+    solicitante: solicitantes[indice % solicitantes.length],
+    dataConsulta: tipo === 'consulta' ? dataExemplo((numero % 9) - 3) : null,
+    beneficiario: `PESSOA FICTÍCIA ${String(numero).padStart(2, '0')}`,
+    cpf: '000.000.000-00',
+    procedimento: procedimentos[indice % procedimentos.length],
+    clinicaHospital: locais[indice % locais.length],
+    valorSolicitado: 250 + numero * 75,
+    formaPagamento: 'Pix',
+    dadosBancarios: `Chave Pix fictícia: chave-demo-${String(numero).padStart(2, '0')}@example.invalid`,
+    autorizacao,
+    dataAutorizacao: autorizacao === 'pendente' ? null : dataExemplo(1 + (numero % 12)),
+    motivoRecusa: autorizacao === 'nao' ? 'Cenário fictício de solicitação recusada.' : null,
+    motivoAutorizacao: null,
+    dataPrevistaPagamento:
+      statusFinanceiro === 'Agendado' ? dataExemplo(-2) : null,
+    statusFinanceiro,
+    dataPagamento,
+    observacoes: 'Registro fictício de demonstração.',
+  }
+})
+
 export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
   {
     id: 'demo-1',
@@ -453,4 +507,5 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     dataPagamento: null,
     observacoes: 'Cenário fictício aguardando pagamento.',
   },
+  ...solicitacoesDemoAdicionais,
 ]
