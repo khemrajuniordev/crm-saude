@@ -31,7 +31,7 @@ const DUVIDAS: Duvida[] = [
   {
     grupo: 'Geral',
     p: 'A lista atualiza sozinha?',
-    r: 'Sim. A lista é em tempo real: quando alguém cria ou altera uma solicitação, ela aparece atualizada para todos os setores automaticamente, sem precisar recarregar.',
+    r: 'Nesta demonstração, alterações aparecem em outras abas abertas no mesmo navegador. Os dados não são compartilhados entre dispositivos ou usuários.',
   },
   {
     grupo: 'Geral',

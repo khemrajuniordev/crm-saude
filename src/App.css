@@ -5298,6 +5298,16 @@
   --tom-recusado-bg: #fee2e2;
 }
 
+.crm-demo-aviso {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 1px solid #f3d48b;
+  border-radius: 10px;
+  background: #fff8e6;
+  color: #704b00;
+  font-size: 13px;
+}
+
 .crm-topo {
   display: flex;
   align-items: center;

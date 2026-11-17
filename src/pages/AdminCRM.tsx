@@ -8,7 +8,6 @@ import {
   numeroParaMascara,
 } from '../utils/formulario'
 import {
-  AVISOS_ATIVOS,
   STATUS_FINANCEIRO,
   PAPEL_LABEL,
   etapaAtual,
@@ -38,7 +37,6 @@ import {
   listarSolicitacoes,
   meuNome,
   meuPapel,
-  notificar,
   sugestoesRede,
   urlAnexo,
   type AnexoCRM,
@@ -136,7 +134,7 @@ export default function AdminCRM() {
     }
   }, [])
 
-  /* ---- tempo real: atualiza a lista quando outro usuário muda algo ---- */
+  /* Sincroniza alterações feitas em outras abas deste navegador. */
   useEffect(() => {
     if (!papel) return
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -211,14 +209,13 @@ export default function AdminCRM() {
     return r
   }, [lista, busca, filtro])
 
-  /* ---- mutações (Supabase) ---- */
+  /* ---- mutações locais ---- */
   const atualizar = async (id: string, patch: Partial<SolicitacaoCRM>) => {
     setErro('')
     try {
       const nova = await atualizarSolicitacao(id, patch)
       setLista((atual) => atual.map((s) => (s.id === id ? nova : s)))
       setSelecionada((atual) => (atual && atual.id === id ? nova : atual))
-      if (AVISOS_ATIVOS && patch.autorizacao === 'sim') void notificar('autorizada', id)
     } catch (e) {
       setErro('Não foi possível salvar a alteração: ' + mensagemErro(e))
     }
@@ -263,10 +260,9 @@ export default function AdminCRM() {
           console.warn('Falha ao anexar documento:', e)
         }
       }
-      // dedup por id: o tempo real pode ter adicionado a nova antes daqui
+      // Evita duplicar se a outra aba já refletiu esta solicitação.
       setLista((atual) => [nova, ...atual.filter((s) => s.id !== nova.id)])
       setForm(null)
-      if (AVISOS_ATIVOS) void notificar('nova', nova.id)
     } catch (err) {
       setErro('Não foi possível criar a solicitação: ' + mensagemErro(err))
     }

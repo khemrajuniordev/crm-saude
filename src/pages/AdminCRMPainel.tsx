@@ -5,6 +5,7 @@ import {
   calcularAlertas,
   etapaAtual,
   formatarValor,
+  hojeISO,
   ROTULO_ALERTA,
   type SolicitacaoCRM,
   type PapelCRM,
@@ -52,7 +53,7 @@ function calcular(lista: SolicitacaoCRM[]) {
     .filter((s) => s.autorizacao === 'sim' && s.statusFinanceiro !== 'Pago')
     .reduce((a, s) => a + (s.valorSolicitado ?? 0), 0)
 
-  const mesAtual = new Date().toISOString().slice(0, 7)
+  const mesAtual = hojeISO().slice(0, 7)
   const pagoNoMes = lista
     .filter((s) => s.statusFinanceiro === 'Pago' && (s.dataPagamento ?? '').startsWith(mesAtual))
     .reduce((a, s) => a + (s.valorSolicitado ?? 0), 0)
@@ -187,7 +188,7 @@ export default function AdminCRMPainel() {
     }
   }, [recarregar])
 
-  /* ---- tempo real: atualiza os números quando algo muda ---- */
+  /* Atualiza os números quando outra aba deste navegador altera os dados. */
   useEffect(() => {
     if (!papel) return
     let timer: ReturnType<typeof setTimeout> | undefined

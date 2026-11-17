@@ -1,9 +1,7 @@
 /**
  * Controle de CRM — CM.
  *
- * Tipos, helpers de fluxo e dados de exemplo (em memória) para montar o
- * frontend. A persistência real (Supabase) entra depois, trocando este módulo
- * por um `crmRepo.ts` com a mesma forma de dados.
+ * Tipos, helpers de fluxo e dados fictícios da demonstração local do CRM.
  *
  * Fluxo em 3 etapas sequenciais:
  *   1. ATENDIMENTO  → registra a solicitação
@@ -25,13 +23,6 @@ export const STATUS_FINANCEIRO: StatusFinanceiro[] = [
 ]
 
 export const FORMAS_PAGAMENTO = ['Pix'] as const
-
-/**
- * STANDBY dos avisos automáticos entre etapas (e-mail via crm-notificar).
- * Enquanto `false`, nenhuma notificação é disparada ao criar/autorizar.
- * Para religar, basta trocar para `true` (a função já está deployada).
- */
-export const AVISOS_ATIVOS = false
 
 export type TipoSolicitacao = 'consulta' | 'reembolso'
 
@@ -138,7 +129,11 @@ export const PAPEL_LABEL: Record<PapelCRM, string> = {
  * Utilidades
  * ========================================================== */
 export function hojeISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  const hoje = new Date()
+  const ano = hoje.getFullYear()
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0')
+  const dia = String(hoje.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
 }
 
 export function formatarData(iso: string | null): string {
@@ -153,7 +148,7 @@ export function formatarValor(v: number | null): string {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-/** Protocolo sequencial: CRM-AAAA-00001 (gerado no banco depois). */
+/** Protocolo sequencial local: CRM-AAAA-00001. */
 export function proximoProtocolo(existentes: SolicitacaoCRM[]): string {
   const ano = new Date().getFullYear()
   const doAno = existentes.filter((s) => s.protocolo.includes(`-${ano}-`))
@@ -327,73 +322,80 @@ export function calcularAlertas(lista: SolicitacaoCRM[], idsComDoc?: Set<string>
   return alertas
 }
 
-/* ============================================================
- * Dados de exemplo (preview) — substituídos pelo Supabase depois
- * ========================================================== */
+function dataExemplo(diasAtras: number): string {
+  const data = new Date()
+  data.setDate(data.getDate() - diasAtras)
+  const ano = data.getFullYear()
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
+/* Todos os nomes, identificadores e chaves abaixo são fictícios. */
 export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
   {
-    id: 's1',
-    protocolo: 'CRM-2026-00001',
+    id: 'demo-1',
+    protocolo: `CRM-${new Date().getFullYear()}-00001`,
     tipo: 'consulta',
-    abertura: '2026-10-06',
-    termino: '2026-10-26',
-    solicitante: 'VANESSA',
-    dataConsulta: '2026-10-09',
-    beneficiario: 'GAEL HENRIQUE SOUZA ATHAYDE',
-    cpf: '123.456.789-09',
-    procedimento: 'CONSULTA ENDÓCRINO PEDIÁTRICO',
-    clinicaHospital: 'ENDOCARDIO',
-    valorSolicitado: 621.25,
+    abertura: dataExemplo(3),
+    termino: dataExemplo(-10),
+    solicitante: 'ALEX DEMONSTRAÇÃO',
+    dataConsulta: dataExemplo(-5),
+    beneficiario: 'PESSOA FICTÍCIA 01',
+    cpf: '000.000.000-00',
+    procedimento: 'CONSULTA DE EXEMPLO',
+    clinicaHospital: 'CLÍNICA MODELO',
+    valorSolicitado: 620,
     formaPagamento: 'Pix',
-    dadosBancarios: 'Pix (e-mail): endocardio.ro@gmail.com',
+    dadosBancarios: 'Chave Pix fictícia: chave-demo-01@example.invalid',
     autorizacao: 'sim',
-    dataAutorizacao: '2026-10-08',
+    dataAutorizacao: dataExemplo(2),
     motivoRecusa: null,
     motivoAutorizacao: null,
-    dataPrevistaPagamento: '2026-10-09',
+    dataPrevistaPagamento: dataExemplo(-2),
     statusFinanceiro: 'Agendado',
     dataPagamento: null,
     observacoes: '',
   },
   {
-    id: 's2',
-    protocolo: 'CRM-2026-00002',
+    id: 'demo-2',
+    protocolo: `CRM-${new Date().getFullYear()}-00002`,
     tipo: 'consulta',
-    abertura: '2026-09-15',
+    abertura: dataExemplo(14),
     termino: null,
-    solicitante: 'VANESSA',
+    solicitante: 'ALEX DEMONSTRAÇÃO',
     dataConsulta: null,
-    beneficiario: 'ERIKA RODRIGUES DE SOUZA FAIANÇA',
-    cpf: '987.654.321-00',
-    procedimento: 'LIFTING CERVICOFACIAL',
+    beneficiario: 'PESSOA FICTÍCIA 02',
+    cpf: '000.000.000-00',
+    procedimento: 'PROCEDIMENTO DEMONSTRATIVO',
     clinicaHospital: '',
-    valorSolicitado: null,
+    valorSolicitado: 250,
     formaPagamento: 'Pix',
     dadosBancarios: '',
     autorizacao: 'nao',
-    dataAutorizacao: '2026-09-16',
-    motivoRecusa: null,
+    dataAutorizacao: dataExemplo(12),
+    motivoRecusa: 'Cenário fictício de solicitação recusada.',
     motivoAutorizacao: null,
     dataPrevistaPagamento: null,
     statusFinanceiro: 'Recusado',
     dataPagamento: null,
-    observacoes: 'Procedimento estético — fora de cobertura.',
+    observacoes: 'Registro de demonstração sem dados reais.',
   },
   {
-    id: 's3',
-    protocolo: 'CRM-2026-00003',
+    id: 'demo-3',
+    protocolo: `CRM-${new Date().getFullYear()}-00003`,
     tipo: 'consulta',
-    abertura: '2026-10-10',
-    termino: '2026-10-30',
-    solicitante: 'MARCOS',
-    dataConsulta: '2026-10-14',
-    beneficiario: 'JOÃO PEDRO LIMA',
-    cpf: '111.222.333-96',
-    procedimento: 'RESSONÂNCIA MAGNÉTICA DE JOELHO',
-    clinicaHospital: 'CLÍNICA IMAGEM RO',
+    abertura: dataExemplo(1),
+    termino: dataExemplo(-14),
+    solicitante: 'BIA DEMONSTRAÇÃO',
+    dataConsulta: dataExemplo(1),
+    beneficiario: 'PESSOA FICTÍCIA 03',
+    cpf: '000.000.000-00',
+    procedimento: 'EXAME DEMONSTRATIVO',
+    clinicaHospital: 'CENTRO FICTÍCIO DE SAÚDE',
     valorSolicitado: 480,
     formaPagamento: 'Pix',
-    dadosBancarios: 'Pix (CNPJ): 12.345.678/0001-90',
+    dadosBancarios: 'Chave Pix fictícia: chave-demo-03@example.invalid',
     autorizacao: 'pendente',
     dataAutorizacao: null,
     motivoRecusa: null,
@@ -404,51 +406,51 @@ export const SOLICITACOES_EXEMPLO: SolicitacaoCRM[] = [
     observacoes: '',
   },
   {
-    id: 's4',
-    protocolo: 'CRM-2026-00004',
-    tipo: 'consulta',
-    abertura: '2026-10-11',
-    termino: '2026-10-31',
-    solicitante: 'VANESSA',
-    dataConsulta: '2026-10-12',
-    beneficiario: 'MARIA EDUARDA ALVES',
-    cpf: '444.555.666-20',
-    procedimento: 'SESSÕES DE FISIOTERAPIA (10x)',
-    clinicaHospital: 'REABILITAR',
+    id: 'demo-4',
+    protocolo: `CRM-${new Date().getFullYear()}-00004`,
+    tipo: 'reembolso',
+    abertura: dataExemplo(35),
+    termino: dataExemplo(30),
+    solicitante: 'CAIO DEMONSTRAÇÃO',
+    dataConsulta: dataExemplo(40),
+    beneficiario: 'PESSOA FICTÍCIA 04',
+    cpf: '000.000.000-00',
+    procedimento: 'REEMBOLSO DE EXEMPLO',
+    clinicaHospital: 'PRESTADOR FICTÍCIO',
     valorSolicitado: 1200,
     formaPagamento: 'Pix',
-    dadosBancarios: 'Pix (telefone): (69) 99999-0000',
+    dadosBancarios: 'Chave Pix fictícia: chave-demo-04@example.invalid',
     autorizacao: 'sim',
-    dataAutorizacao: '2026-10-12',
+    dataAutorizacao: dataExemplo(33),
     motivoRecusa: null,
     motivoAutorizacao: null,
-    dataPrevistaPagamento: '2026-10-05',
+    dataPrevistaPagamento: dataExemplo(28),
     statusFinanceiro: 'Pago',
-    dataPagamento: '2026-10-05',
+    dataPagamento: dataExemplo(28),
     observacoes: '',
   },
   {
-    id: 's5',
-    protocolo: 'CRM-2026-00005',
+    id: 'demo-5',
+    protocolo: `CRM-${new Date().getFullYear()}-00005`,
     tipo: 'consulta',
-    abertura: '2026-10-13',
+    abertura: dataExemplo(5),
     termino: null,
-    solicitante: 'LUCAS',
-    dataConsulta: '2026-10-20',
-    beneficiario: 'ANTÔNIO CARLOS PEREIRA',
-    cpf: '777.888.999-00',
-    procedimento: 'CONSULTA CARDIOLOGIA',
-    clinicaHospital: 'CARDIO CENTER',
+    solicitante: 'ALEX DEMONSTRAÇÃO',
+    dataConsulta: dataExemplo(-7),
+    beneficiario: 'PESSOA FICTÍCIA 05',
+    cpf: '000.000.000-00',
+    procedimento: 'CONSULTA DE ACOMPANHAMENTO',
+    clinicaHospital: 'CLÍNICA MODELO',
     valorSolicitado: 350,
     formaPagamento: 'Pix',
     dadosBancarios: '',
     autorizacao: 'sim',
-    dataAutorizacao: '2026-10-13',
+    dataAutorizacao: dataExemplo(4),
     motivoRecusa: null,
     motivoAutorizacao: null,
     dataPrevistaPagamento: null,
     statusFinanceiro: 'Pendente',
     dataPagamento: null,
-    observacoes: '',
+    observacoes: 'Cenário fictício aguardando pagamento.',
   },
 ]

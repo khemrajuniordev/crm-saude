@@ -75,13 +75,13 @@ export default function AdminCRMUsuarios() {
   }
 
   const redefinir = async (u: UsuarioCRM) => {
-    if (!confirm(`Enviar uma nova senha provisória para ${u.nome || u.email}?`)) return
+    if (!confirm(`Simular a redefinição de senha para ${u.nome || u.email}?`)) return
     setErro('')
     setAviso('')
     setOcupado(u.user_id)
     try {
       await redefinirSenha(u.user_id)
-      setAviso(`Nova senha provisória enviada para ${u.email}.`)
+      setAviso(`Redefinição simulada para ${u.email}. Nenhum e-mail foi enviado.`)
     } catch (e) {
       setErro(String(e))
     } finally {
@@ -90,7 +90,7 @@ export default function AdminCRMUsuarios() {
   }
 
   const remover = async (u: UsuarioCRM) => {
-    if (!confirm(`Remover ${u.nome || u.email}? O acesso dessa pessoa será apagado.`)) return
+    if (!confirm(`Remover ${u.nome || u.email} da lista local de demonstração?`)) return
     setErro('')
     setAviso('')
     setOcupado(u.user_id)
@@ -115,7 +115,7 @@ export default function AdminCRMUsuarios() {
       const novo = await convidarUsuario(form.nome.trim(), form.email.trim(), form.papel)
       setLista((atual) => [...atual, novo])
       setForm(null)
-      setAviso(`Acesso enviado para ${novo.email} (e-mail com a senha provisória).`)
+      setAviso(`Usuário ${novo.email} adicionado a este navegador.`)
     } catch (err) {
       setErro('Não foi possível convidar: ' + String(err))
     } finally {
@@ -165,7 +165,7 @@ export default function AdminCRMUsuarios() {
           <strong>{lista.length}</strong> usuários
         </p>
         <button type="button" className="btn btn-primary" onClick={() => setForm(FORM_VAZIO)}>
-          + Novo usuário
+          + Adicionar usuário
         </button>
       </div>
 
@@ -261,7 +261,7 @@ export default function AdminCRMUsuarios() {
             </div>
 
             <div className="campo">
-              <label htmlFor="u-email">E-mail (login)</label>
+              <label htmlFor="u-email">E-mail fictício</label>
               <input
                 id="u-email"
                 type="email"
@@ -287,8 +287,7 @@ export default function AdminCRMUsuarios() {
             </div>
 
             <p className="crm-aviso">
-              Ao criar, o usuário recebe um e-mail com uma senha provisória e já
-              entra em /admin com o papel escolhido.
+              Este cadastro é apenas demonstrativo. Não cria acesso nem envia e-mails.
             </p>
 
             <div className="crm-modal-acoes">
@@ -296,7 +295,7 @@ export default function AdminCRMUsuarios() {
                 Cancelar
               </button>
               <button type="submit" className="btn btn-primary" disabled={salvando}>
-                {salvando ? 'Enviando…' : 'Criar e convidar'}
+                {salvando ? 'Salvando…' : 'Adicionar à demonstração'}
               </button>
             </div>
           </form>
