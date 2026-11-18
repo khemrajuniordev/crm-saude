@@ -4767,8 +4767,8 @@ button:disabled {
 .admin {
   min-height: 100svh;
   padding-block: clamp(28px, 5vw, 48px) 80px;
-  background: #eef2f9;
-  color: #1c2a4a;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 /* botoes "fantasma" (Ver pagina publica / Sair / Cancelar) na faixa clara */
@@ -5961,13 +5961,11 @@ button:disabled {
    branco (texto) ou em vidro escuro (cartoes/campos).
    Superficies auxiliares reutilizadas abaixo. */
 :root {
-  --surface: #ffffff;
-  --surface-soft: #f4f9ff;
-  --surface-border: #dbe6fb;
-  --surface-tint: rgba(36, 86, 201, 0.07);
-  --field-bg: #ffffff;
-  --field-border: #cdd6e8;
-  --field-placeholder: #8a95af;
+  --surface-border: var(--rule);
+  --surface-tint: rgba(29, 78, 216, 0.06);
+  --field-bg: var(--surface);
+  --field-border: #c9d1e0;
+  --field-placeholder: var(--ink-3);
 }
 
 /* --- Logo branca sobre "chip" navy (header e footer) --- */
@@ -6715,17 +6713,23 @@ button:disabled {
 /* ============================================================
  * Controle de CRM (CM)
  * ========================================================== */
+/* Tons de etapa. Cada par passa em AA (4,5:1) sobre o próprio
+   fundo. O roxo de "agendado" saiu: era um matiz a mais sem
+   trabalho de informação para fazer, e o cinza-ardósia separa
+   melhor a etapa administrativa das etapas de fila. */
 .crm {
-  --tom-aguardando: #b45309;
-  --tom-aguardando-bg: #fef3c7;
-  --tom-analise: #1e40af;
-  --tom-analise-bg: #dbeafe;
-  --tom-agendado: #5b21b6;
-  --tom-agendado-bg: #ede9fe;
-  --tom-ok: #047857;
-  --tom-ok-bg: #d1fae5;
-  --tom-recusado: #b91c1c;
-  --tom-recusado-bg: #fee2e2;
+  --tom-aguardando: #92400e; /* enfermagem */
+  --tom-aguardando-bg: #fef0c7;
+  --tom-financeiro: #1d4ed8; /* financeiro */
+  --tom-financeiro-bg: #dbe7fe;
+  --tom-analise: #1d4ed8;
+  --tom-analise-bg: #dbe7fe;
+  --tom-agendado: #334155;
+  --tom-agendado-bg: #e2e8f0;
+  --tom-ok: var(--pago);
+  --tom-ok-bg: #d1f0e2;
+  --tom-recusado: var(--recusado);
+  --tom-recusado-bg: #fbe3e4;
 }
 
 .crm-demo-aviso {
@@ -6852,6 +6856,11 @@ button.crm-card.ativo .crm-card-num {
   background: var(--tom-aguardando-bg);
   border-color: transparent;
 }
+.crm-chip.tom-financeiro {
+  color: var(--tom-financeiro);
+  background: var(--tom-financeiro-bg);
+}
+
 .crm-chip.tom-analise {
   color: var(--tom-analise);
   background: var(--tom-analise-bg);
@@ -6934,6 +6943,11 @@ button.crm-card.ativo .crm-card-num {
   color: var(--tom-aguardando);
   background: var(--tom-aguardando-bg);
 }
+.crm-badge.tom-financeiro {
+  color: var(--tom-financeiro);
+  background: var(--tom-financeiro-bg);
+}
+
 .crm-badge.tom-analise {
   color: var(--tom-analise);
   background: var(--tom-analise-bg);
@@ -8358,4 +8372,555 @@ button.crm-card.ativo .crm-card-num {
 .crm-sub {
   color: var(--text-dim);
   font-size: 12px;
+}
+
+/* ============================================================
+ * CRM — densidade e fluxo (design 3.0, etapa 2)
+ * ------------------------------------------------------------
+ * A tabela passa a ser a página. Tudo em volta é cromo e fica
+ * quieto: uma faixa de fluxo no lugar dos quatro cartões de
+ * indicador mais as oito pílulas de filtro, e uma única linha
+ * de trabalho no lugar da barra de contagem, do bloco de
+ * filtros e do campo de busca soltos.
+ * ========================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- faixa de fluxo ---------- */
+
+.crm-fluxo {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.crm-fases {
+  display: flex;
+  flex: 1 1 520px;
+  min-width: 0;
+}
+
+.crm-fase {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 14px 10px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.crm-fase:hover {
+  background: var(--surface-tint);
+}
+
+.crm-fase.ativo {
+  background: var(--surface-tint);
+}
+
+.crm-fase-rot {
+  font-size: var(--fs-meta);
+  line-height: 1.2;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crm-fase.ativo .crm-fase-rot {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.crm-fase-num {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trilho da fila. A largura do preenchimento é a fila desta
+   etapa contra a maior fila do momento, então a faixa mostra
+   onde o trabalho empilhou sem precisar de um gráfico. */
+.crm-fase-barra {
+  position: relative;
+  display: block;
+  height: 3px;
+  margin-top: 2px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+
+.crm-fase-barra::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--fila, 100%);
+  border-radius: inherit;
+  background: var(--fase-cor, var(--etapa-4));
+}
+
+.crm-fase-todas .crm-fase-barra {
+  background: var(--etapa-1);
+}
+.crm-fase-todas .crm-fase-barra::after {
+  display: none;
+}
+
+.crm-fase-n1 {
+  --fase-cor: var(--etapa-1);
+}
+.crm-fase-n2 {
+  --fase-cor: var(--etapa-2);
+}
+.crm-fase-n3 {
+  --fase-cor: var(--etapa-3);
+}
+.crm-fase-n4 {
+  --fase-cor: var(--etapa-4);
+}
+
+/* Saída do fluxo: separada por um fio mais forte e na única
+   cor reservada à recusa. */
+.crm-fase-saida {
+  --fase-cor: var(--recusado);
+  border-left: 1px solid var(--rule);
+  box-shadow: inset 2px 0 0 -1px var(--rule);
+}
+
+/* ---------- dinheiro ---------- */
+
+.crm-dinheiro {
+  display: flex;
+  gap: 26px;
+  margin: 0;
+  padding: 11px 18px 10px;
+  border-left: 1px solid var(--rule);
+  background: var(--surface-soft);
+}
+
+.crm-dinheiro > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.crm-dinheiro dt {
+  font-size: var(--fs-meta);
+  line-height: 1.2;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.crm-dinheiro dd {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- barra de trabalho ---------- */
+
+.crm-barra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 10px;
+}
+
+.crm-barra .crm-busca {
+  flex: 1 1 280px;
+  min-width: 0;
+  margin: 0;
+}
+
+.crm-busca-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  background: var(--field-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-base);
+}
+
+.crm-busca-input::placeholder {
+  color: var(--field-placeholder);
+}
+
+.crm-recortes {
+  display: flex;
+  gap: 6px;
+}
+
+.crm-recorte {
+  height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.crm-recorte:hover {
+  border-color: var(--royal);
+  color: var(--ink);
+}
+
+.crm-recorte.ativo {
+  border-color: var(--royal);
+  background: var(--royal);
+  color: #fff;
+}
+
+.crm-contagem {
+  margin: 0;
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.crm-limpar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--royal);
+  font: inherit;
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.crm-limpar:hover {
+  text-decoration: underline;
+}
+
+.crm-barra .btn-primary {
+  height: 38px;
+  white-space: nowrap;
+}
+
+/* ---------- tabela ---------- */
+
+.crm .admin-tabela-wrap {
+  border-radius: 6px;
+}
+
+/* Rótulo de coluna: caixa baixa e largura condensada no lugar
+   da caixa alta espaçada. Ocupa menos, lê igual, e deixa de
+   competir com o dado. */
+.crm .admin-tabela th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 9px 16px;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  font-stretch: 88%;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--ink-2);
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--rule);
+}
+
+.crm .admin-tabela td {
+  padding: 10px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: var(--fs-base);
+}
+
+.crm .admin-tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.crm .admin-tabela tbody tr:hover td {
+  background: var(--surface-tint);
+}
+
+/* Números tabulares e à direita: a coluna passa a ser
+   comparável a olho, sem precisar ler dígito por dígito. */
+.crm .admin-tabela th.num,
+.crm .admin-tabela td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.crm .admin-tabela td strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.crm .admin-tabela td small {
+  display: block;
+  margin-top: 1px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+/* A exceção vira marca na linha, não bloco dentro da célula:
+   assim a altura da linha não muda e a tabela continua
+   escaneável. */
+.crm .crm-etapa-cel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.crm .crm-row-urg td:first-child {
+  box-shadow: inset 3px 0 0 var(--atrasado);
+}
+
+/* ---------- faixa de contexto do admin ---------- */
+
+.admin-contexto {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.admin-marca {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.admin-demo {
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--navy-700);
+  color: var(--ink-2);
+  font-size: var(--fs-label);
+}
+
+/* A marca da linha e o badge ficam lado a lado: a frase longa
+   foi para o title e para o detalhe da solicitação. */
+.crm .crm-etapa-cel {
+  flex-direction: row;
+  align-items: center;
+}
+
+.crm .crm-badge.crm-urg {
+  align-items: center;
+  white-space: nowrap;
+}
+
+.crm-barra .crm-contagem {
+  margin-inline: 6px 2px;
+}
+
+/* Em telas estreitas a faixa não cabe em uma linha: as fases
+   passam a grade de três colunas, onde o rótulo cabe inteiro.
+   Truncar o nome da etapa derrotaria o propósito da faixa. */
+@media (max-width: 720px) {
+  .crm-fluxo {
+    flex-direction: column;
+  }
+
+  .crm-fases {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .crm-fase {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .crm-fase:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .crm-fase-saida {
+    border-left: 0;
+    box-shadow: none;
+  }
+
+  .crm-fase-rot {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .crm-dinheiro {
+    border-left: 0;
+    justify-content: space-between;
+  }
+
+  .crm-barra .btn-primary {
+    flex: 1 1 100%;
+  }
+}
+
+/* ============================================================
+ * Painel e Usuários (design 3.0, etapa 4)
+ * ========================================================== */
+
+/* Os indicadores do painel adotam a forma da faixa de fluxo,
+   para o vocabulário ser o mesmo nas duas telas. Sem hover e
+   sem cursor de clique: aqui eles não filtram nada, e parecer
+   clicável sem ser seria uma mentira da interface. */
+.pnl-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 18px 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.pnl-kpi {
+  flex: 1 1 0;
+  min-width: 150px;
+  gap: 5px;
+  padding: 11px 14px 12px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  border-radius: 0;
+}
+
+.pnl-kpi:last-child {
+  border-right: 0;
+}
+
+.pnl-kpi-lab {
+  font-size: var(--fs-meta);
+  color: var(--ink-2);
+}
+
+.pnl-kpi-num {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Painéis: fio em vez de sombra, e raio menor. Seis cartões
+   flutuando com a mesma sombra davam o mesmo peso visual a
+   conteúdos de importância diferente. */
+.pnl-card {
+  padding: 16px 18px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.pnl-card h3 {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.pnl-cap {
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+}
+
+/* Mês sem pagamento: a coluna fica como linha de base, não
+   como um toco de barra com travessão em cima — aquilo lia
+   como gráfico quebrado, não como ausência de dado. */
+.pnl-vcol.vazia .pnl-vbar {
+  height: 1px;
+  min-height: 1px;
+  background: var(--rule);
+  animation: none;
+}
+
+.pnl-vcol.vazia .pnl-m {
+  color: var(--ink-3);
+}
+
+.pnl-vcol.vazia .pnl-vv {
+  min-height: 1em;
+}
+
+/* ---------- Usuários ---------- */
+
+/* Verde é a cor de "Pago" neste sistema. Ativo/inativo não é
+   desfecho de pagamento, então o switch usa a cor de
+   interação. */
+.crm-switch.on {
+  background: var(--royal);
+}
+
+/* A ação destrutiva fica legível, mas não grita em toda linha:
+   assume a cor de recusa no hover e no foco, quando passa a
+   ser a ação em questão. */
+.crm .admin-link-danger {
+  color: var(--ink-2);
+}
+
+.crm .admin-link-danger:hover,
+.crm .admin-link-danger:focus-visible {
+  color: var(--recusado);
+  text-decoration: underline;
+}
+
+.crm-sel-papel {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  background: var(--field-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-meta);
+}
+
+/* Um td não pode virar flex container: perde o cálculo de
+   largura de célula e o conteúdo escapa da tabela. O
+   espaçamento vai nos próprios links. */
+.crm .admin-td-acoes {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.crm .admin-td-acoes > * + * {
+  margin-left: 14px;
+}
+
+/* Sem campo de busca nesta tela, a ação primária é empurrada
+   para a direita pela contagem. */
+.crm-barra .btn-primary {
+  margin-left: auto;
 }

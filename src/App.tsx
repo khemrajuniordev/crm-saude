@@ -11,7 +11,11 @@ import { ROUTES } from './routes'
 
 function App() {
   return (
-    <BrowserRouter>
+    /* O app é publicado em um subcaminho no GitHub Pages
+       (/crm-saude/). Sem o basename, o router lê o prefixo como
+       parte da rota, não encontra nada, cai no "*" e redireciona
+       para "/" — que fora do SPA é um 404 do próprio Pages. */
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path={ROUTES.home} element={<LandingPage />} />
         <Route path={ROUTES.login} element={<LoginPage />} />
