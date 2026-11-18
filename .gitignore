@@ -31,3 +31,4 @@ dist-ssr
 
 # Supabase CLI (estado local do link)
 supabase/.temp/
+.vercel
