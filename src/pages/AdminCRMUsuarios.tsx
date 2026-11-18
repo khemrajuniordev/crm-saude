@@ -138,7 +138,7 @@ export default function AdminCRMUsuarios() {
     <div className="crm">
       <div className="crm-topo">
         <div>
-          <h2 className="admin-secao-titulo">CRM · Usuários</h2>
+          <h2 className="admin-secao-titulo">Usuários</h2>
           <p className="crm-topo-descricao">Gerencie os acessos e os perfis da demonstração.</p>
         </div>
         <Link className="btn btn-ghost" to={ROUTES.adminCrm}>
@@ -163,12 +163,12 @@ export default function AdminCRMUsuarios() {
         </div>
       )}
 
-      <div className="admin-barra">
-        <p className="rede-contagem">
-          <strong>{lista.length}</strong> usuários
+      <div className="crm-barra">
+        <p className="crm-contagem" aria-live="polite">
+          {lista.length} {lista.length === 1 ? 'usuário' : 'usuários'}
         </p>
         <button type="button" className="btn btn-primary" onClick={() => setForm(FORM_VAZIO)}>
-          + Adicionar usuário
+          Adicionar usuário
         </button>
       </div>
 

@@ -288,7 +288,7 @@ export default function AdminCRMPainel() {
         </div>
         <div className="pnl-kpi">
           <span className="pnl-kpi-lab">
-            <span className="crm-badge tom-aguardando pnl-ponto" /> Aguardando financeiro
+            <span className="crm-badge tom-financeiro pnl-ponto" /> Aguardando financeiro
           </span>
           <span className="pnl-kpi-num">{m.etapas.financeiro}</span>
         </div>
@@ -353,12 +353,12 @@ export default function AdminCRMPainel() {
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Pagamento agendado</span>
-              {barra(m.etapas.agendado, maxEtapa, 'var(--tom-analise)', 80)}
+              {barra(m.etapas.agendado, maxEtapa, 'var(--tom-agendado)', 80)}
               <span className="pnl-v">{m.etapas.agendado}</span>
             </div>
             <div className="pnl-hbar">
               <span className="pnl-n">Aguardando financeiro</span>
-              {barra(m.etapas.financeiro, maxEtapa, 'var(--tom-aguardando)', 160)}
+              {barra(m.etapas.financeiro, maxEtapa, 'var(--tom-financeiro)', 160)}
               <span className="pnl-v">{m.etapas.financeiro}</span>
             </div>
             <div className="pnl-hbar">
@@ -380,12 +380,18 @@ export default function AdminCRMPainel() {
           <p className="pnl-cap">Pagamentos quitados — últimos 6 meses</p>
           <div className="pnl-vbars">
             {m.buckets.map((b, i) => (
-              <div key={b.chave} className={`pnl-vcol${i === m.buckets.length - 1 ? ' cur' : ''}`}>
-                <span className="pnl-vv">{b.valor ? compacto(b.valor) : '—'}</span>
+              <div
+                key={b.chave}
+                className={`pnl-vcol${i === m.buckets.length - 1 ? ' cur' : ''}${
+                  b.valor ? '' : ' vazia'
+                }`}
+                title={b.valor ? undefined : `Sem pagamentos em ${b.rotulo}`}
+              >
+                <span className="pnl-vv">{b.valor ? compacto(b.valor) : ''}</span>
                 <span
                   className="pnl-vbar"
                   style={{
-                    height: `${Math.max(2, (b.valor / maxMes) * 100)}%`,
+                    height: b.valor ? `${(b.valor / maxMes) * 100}%` : undefined,
                     animationDelay: `${i * 70}ms`,
                   }}
                 />
@@ -454,7 +460,7 @@ export default function AdminCRMPainel() {
           <p className="pnl-cap">Desempenho do período</p>
           <div className="pnl-inds">
             <div className="pnl-ind">
-              <span>Tempo médio abertura → pagamento</span>
+              <span>Da abertura até o pagamento</span>
               <strong>{m.sla} dias</strong>
             </div>
             <div className="pnl-ind">
