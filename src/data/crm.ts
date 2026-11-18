@@ -182,7 +182,13 @@ export const ROTULO_ALERTA: Record<TipoAlerta, string> = {
  * Só vale para solicitações ainda NÃO pagas (e não recusadas) com data.
  * ========================================================== */
 export type NivelUrgencia = 'atrasada' | 'urgente' | 'atencao'
-export type UrgenciaConsulta = { nivel: NivelUrgencia; dias: number; rotulo: string } | null
+/* `rotulo` é a frase completa, usada no detalhe da solicitação.
+   `curto` é a marca que vai na tabela: precisa caber ao lado do
+   badge de etapa sem quebrar a linha, senão a altura das linhas
+   deixa de ser uniforme e a tabela para de ser escaneável. */
+export type UrgenciaConsulta =
+  | { nivel: NivelUrgencia; dias: number; rotulo: string; curto: string }
+  | null
 
 export function urgenciaConsulta(s: SolicitacaoCRM): UrgenciaConsulta {
   if (s.tipo === 'reembolso') return null // reembolso é despesa passada, não time-critical
@@ -193,14 +199,29 @@ export function urgenciaConsulta(s: SolicitacaoCRM): UrgenciaConsulta {
   const dc = new Date(s.dataConsulta)
   const dias = Math.round((dc.getTime() - hoje.getTime()) / 86400000)
   if (dias < 0)
-    return { nivel: 'atrasada', dias, rotulo: `Consulta atrasada (${formatarData(s.dataConsulta)}) · não paga` }
+    return {
+      nivel: 'atrasada',
+      dias,
+      rotulo: `Consulta atrasada em ${formatarData(s.dataConsulta)}, sem pagamento`,
+      curto: `${Math.abs(dias)}d atrasada`,
+    }
   if (dias <= 1)
     return {
       nivel: 'urgente',
       dias,
-      rotulo: dias === 0 ? 'Consulta hoje · não paga' : 'Consulta amanhã · não paga',
+      rotulo:
+        dias === 0
+          ? 'Consulta hoje, sem pagamento'
+          : 'Consulta amanhã, sem pagamento',
+      curto: dias === 0 ? 'Hoje' : 'Amanhã',
     }
-  if (dias <= 3) return { nivel: 'atencao', dias, rotulo: `Consulta em ${dias} dias · não paga` }
+  if (dias <= 3)
+    return {
+      nivel: 'atencao',
+      dias,
+      rotulo: `Consulta em ${dias} dias, sem pagamento`,
+      curto: `em ${dias}d`,
+    }
   return null
 }
 

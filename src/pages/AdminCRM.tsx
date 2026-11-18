@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../routes'
 import {
@@ -45,17 +51,26 @@ import {
 } from '../data/crmRepo'
 
 /* ============================================================
- * Filtros de etapa (para a barra de filtro e os cards)
+ * Fluxo da solicitação
+ * ------------------------------------------------------------
+ * As quatro etapas na ordem em que a solicitação anda. O nível
+ * escurece conforme avança, então a faixa lê como progresso e
+ * não como um conjunto de categorias. "Não autorizado" fica
+ * fora da sequência porque é saída, não fase.
  * ========================================================== */
-const FILTROS = [
-  { chave: 'todos', label: 'Todas', tom: '' },
-  { chave: 'tipo-reembolso', label: 'Reembolsos', tom: '' },
-  { chave: 'consultas', label: 'Próximas consultas', tom: '' },
-  { chave: 'enfermagem', label: 'Aguardando enfermagem', tom: 'aguardando' },
-  { chave: 'financeiro', label: 'Aguardando financeiro', tom: 'analise' },
-  { chave: 'agendado', label: 'Agendado', tom: 'agendado' },
-  { chave: 'pago', label: 'Pago', tom: 'ok' },
-  { chave: 'recusado', label: 'Não autorizado', tom: 'recusado' },
+const ETAPAS_FLUXO = [
+  { chave: 'enfermagem', label: 'Enfermagem', nivel: 1 },
+  { chave: 'financeiro', label: 'Financeiro', nivel: 2 },
+  { chave: 'agendado', label: 'Agendado', nivel: 3 },
+  { chave: 'pago', label: 'Pago', nivel: 4 },
+] as const
+
+/* Recortes que não são etapa — um é tipo de solicitação, o
+   outro é proximidade da consulta. Ficam separados da faixa
+   para não se passarem por fase do fluxo. */
+const RECORTES = [
+  { chave: 'tipo-reembolso', label: 'Reembolsos' },
+  { chave: 'consultas', label: 'Próximas consultas' },
 ] as const
 const SOLICITACOES_POR_PAGINA = 10
 
@@ -166,9 +181,18 @@ export default function AdminCRM() {
     const pagoNoMes = lista
       .filter((s) => s.statusFinanceiro === 'Pago' && (s.dataPagamento ?? '').startsWith(mes))
       .reduce((acc, s) => acc + (s.valorSolicitado ?? 0), 0)
-    return {
+    const etapas = {
       enfermagem: porEtapa('enfermagem'),
       financeiro: porEtapa('financeiro'),
+      agendado: porEtapa('agendado'),
+      pago: porEtapa('pago'),
+      recusado: porEtapa('recusado'),
+    }
+    return {
+      ...etapas,
+      total: lista.length,
+      /* maior fila do momento: dá a escala das barras da faixa */
+      pico: Math.max(1, ...Object.values(etapas)),
       totalAPagar,
       pagoNoMes,
     }
@@ -328,100 +352,133 @@ export default function AdminCRM() {
         </div>
       )}
 
-      {/* ---------- cards ---------- */}
-      <div className="crm-cards">
-        <button
-          className={`crm-card${filtro === 'enfermagem' ? ' ativo' : ''}`}
-          type="button"
-          onClick={() => setFiltro('enfermagem')}
-          aria-pressed={filtro === 'enfermagem'}
-        >
-          <span className="crm-card-num">{metricas.enfermagem}</span>
-          <span className="crm-card-rot">Aguardando enfermagem</span>
-        </button>
-        <button
-          className={`crm-card${filtro === 'financeiro' ? ' ativo' : ''}`}
-          type="button"
-          onClick={() => setFiltro('financeiro')}
-          aria-pressed={filtro === 'financeiro'}
-        >
-          <span className="crm-card-num">{metricas.financeiro}</span>
-          <span className="crm-card-rot">Aguardando financeiro</span>
-        </button>
-        <div className="crm-card crm-card-valor">
-          <span className="crm-card-num">{formatarValor(metricas.totalAPagar)}</span>
-          <span className="crm-card-rot">Total a pagar (autorizado)</span>
-        </div>
-        <div className="crm-card crm-card-valor">
-          <span className="crm-card-num">{formatarValor(metricas.pagoNoMes)}</span>
-          <span className="crm-card-rot">Pago no mês</span>
-        </div>
-      </div>
+      {/* ---------- faixa de fluxo ----------
+           Substitui os quatro cartões de indicador e as pílulas
+           de etapa: um elemento só mostra onde o trabalho está
+           empilhado, quanto ele custa, e filtra ao clique. */}
+      <section className="crm-fluxo" aria-label="Fluxo das solicitações">
+        <div className="crm-fases" role="group" aria-label="Filtrar por etapa">
+          <button
+            type="button"
+            className={`crm-fase crm-fase-todas${filtro === 'todos' ? ' ativo' : ''}`}
+            onClick={() => setFiltro('todos')}
+            aria-pressed={filtro === 'todos'}
+          >
+            <span className="crm-fase-rot">Todas</span>
+            <span className="crm-fase-num">{metricas.total}</span>
+            <span className="crm-fase-barra" />
+          </button>
 
-      {/* ---------- barra ---------- */}
-      <div className="crm-lista-toolbar">
-        <p className="rede-contagem">
-          <strong>{filtrada.length}</strong>
-          {busca.trim() || filtro !== 'todos'
-            ? ` de ${lista.length} solicitações`
-            : filtrada.length === 1
-              ? ' solicitação'
-              : ' solicitações'}
+          {ETAPAS_FLUXO.map((e) => (
+            <button
+              key={e.chave}
+              type="button"
+              className={`crm-fase crm-fase-n${e.nivel}${filtro === e.chave ? ' ativo' : ''}`}
+              onClick={() => setFiltro(e.chave)}
+              aria-pressed={filtro === e.chave}
+            >
+              <span className="crm-fase-rot">{e.label}</span>
+              <span className="crm-fase-num">{metricas[e.chave]}</span>
+              <span
+                className="crm-fase-barra"
+                style={
+                  {
+                    '--fila': `${(metricas[e.chave] / metricas.pico) * 100}%`,
+                  } as CSSProperties
+                }
+              />
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className={`crm-fase crm-fase-saida${filtro === 'recusado' ? ' ativo' : ''}`}
+            onClick={() => setFiltro('recusado')}
+            aria-pressed={filtro === 'recusado'}
+          >
+            <span className="crm-fase-rot">Não autorizado</span>
+            <span className="crm-fase-num">{metricas.recusado}</span>
+            <span
+              className="crm-fase-barra"
+              style={
+                {
+                  '--fila': `${(metricas.recusado / metricas.pico) * 100}%`,
+                } as CSSProperties
+              }
+            />
+          </button>
+        </div>
+
+        <dl className="crm-dinheiro">
+          <div>
+            <dt>Total a pagar</dt>
+            <dd>{formatarValor(metricas.totalAPagar)}</dd>
+          </div>
+          <div>
+            <dt>Pago no mês</dt>
+            <dd>{formatarValor(metricas.pagoNoMes)}</dd>
+          </div>
+        </dl>
+      </section>
+
+      {/* ---------- barra de trabalho ---------- */}
+      <div className="crm-barra">
+        <div className="crm-busca">
+          <label className="sr-only" htmlFor="crm-busca">
+            Buscar solicitações
+          </label>
+          <input
+            id="crm-busca"
+            type="search"
+            className="crm-busca-input"
+            placeholder="Buscar por protocolo, paciente, solicitante ou procedimento"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
+
+        <div className="crm-recortes" role="group" aria-label="Outros recortes">
+          {RECORTES.map((r) => (
+            <button
+              key={r.chave}
+              type="button"
+              className={`crm-recorte${filtro === r.chave ? ' ativo' : ''}`}
+              onClick={() => setFiltro(filtro === r.chave ? 'todos' : r.chave)}
+              aria-pressed={filtro === r.chave}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="crm-contagem" aria-live="polite">
+          {filtrada.length === lista.length
+            ? `${lista.length} solicitações`
+            : `${filtrada.length} de ${lista.length}`}
         </p>
+
+        {(busca.trim() || filtro !== 'todos') && (
+          <button
+            type="button"
+            className="crm-limpar"
+            onClick={() => {
+              setBusca('')
+              setFiltro('todos')
+            }}
+          >
+            Limpar filtros
+          </button>
+        )}
+
         {podeEditarAtendimento(papel) && (
           <button
             type="button"
             className="btn btn-primary"
             onClick={() => setForm({ ...FORM_VAZIO, solicitante: nomeAtendente })}
           >
-            + Nova solicitação
+            Nova solicitação
           </button>
         )}
-      </div>
-
-      <section className="crm-filtros-secao" aria-label="Filtros de solicitações">
-        <div className="crm-filtros-cabecalho">
-          <span className="crm-filtros-titulo">Filtrar solicitações</span>
-          {(busca.trim() || filtro !== 'todos') && (
-            <button
-              type="button"
-              className="crm-filtros-limpar"
-              onClick={() => {
-                setBusca('')
-                setFiltro('todos')
-              }}
-            >
-              Limpar filtros
-            </button>
-          )}
-        </div>
-        <div className="crm-filtros" role="group" aria-label="Etapa da solicitação">
-          {FILTROS.map((f) => (
-            <button
-              key={f.chave}
-              type="button"
-              className={`crm-chip${f.tom ? ` tom-${f.tom}` : ''}${filtro === f.chave ? ' ativo' : ''}`}
-              onClick={() => setFiltro(f.chave)}
-              aria-pressed={filtro === f.chave}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="crm-busca">
-        <label className="crm-busca-label" htmlFor="crm-busca">
-          Buscar solicitações
-        </label>
-        <input
-          id="crm-busca"
-          type="search"
-          className="admin-busca-input"
-          placeholder="Protocolo, paciente, solicitante ou procedimento"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
       </div>
 
       {/* ---------- tabela ---------- */}
@@ -432,7 +489,7 @@ export default function AdminCRM() {
               <th>Protocolo</th>
               <th>Paciente</th>
               <th>Procedimento</th>
-              <th>Valor</th>
+              <th className="num">Valor</th>
               <th>Etapa</th>
               <th aria-label="Ações" />
             </tr>
@@ -467,12 +524,17 @@ export default function AdminCRM() {
                     {s.procedimento}
                     {s.clinicaHospital && <small>{s.clinicaHospital}</small>}
                   </td>
-                  <td>{formatarValor(s.valorSolicitado)}</td>
+                  <td className="num">{formatarValor(s.valorSolicitado)}</td>
                   <td>
                     <div className="crm-etapa-cel">
                       <span className={`crm-badge tom-${et.tom}`}>{et.label}</span>
                       {u && (
-                        <span className={`crm-badge crm-urg crm-urg-${u.nivel}`}>{u.rotulo}</span>
+                        <span
+                          className={`crm-badge crm-urg crm-urg-${u.nivel}`}
+                          title={u.rotulo}
+                        >
+                          {u.curto}
+                        </span>
                       )}
                     </div>
                   </td>

@@ -1,27 +1,72 @@
+/* ============================================================
+ * CRM Saúde — camada de tokens (design 3.0)
+ * ------------------------------------------------------------
+ * Superfície neutra, uma única cor de interação e três cores
+ * semânticas. Os nomes legados (--navy-*, --blue-*, --text*)
+ * continuam existindo como alias para os novos valores, então
+ * as regras já escritas em App.css migram sem reescrita.
+ * ========================================================== */
+
 :root {
-  /* Brand palette — tema claro (design2.0): fundo azul claro + navy/royal da marca.
-     Os nomes --navy-* passam a representar as SUPERFICIES claras (fundos das
-     secoes), e --text* passam a ser o navy de marca. Assim, todas as regras
-     baseadas em tokens migram para o tema claro automaticamente. */
-  --navy-900: #eaf3ff; /* superficie base (mais clara) */
-  --navy-800: #dcebff; /* superficie um pouco mais saturada */
-  --navy-700: #cfe3ff;
-  --navy-600: #c2d9fb;
+  /* ---- Base ---- */
+  --paper: #f6f7f9; /* fundo da aplicação (neutro) */
+  --surface: #ffffff; /* painéis e cartões */
+  --surface-soft: #fbfcfd; /* faixas alternadas, cabeçalho de tabela */
+  --ink: #0f1b3d; /* navy da marca — texto principal */
+  --ink-2: #4a5878; /* texto secundário — 6,8:1 sobre --paper */
+  --ink-3: #5e6c8c; /* texto terciário — 4,9:1 sobre --paper */
+  --royal: #1d4ed8; /* única cor de interação */
+  --rule: #dde2ec; /* fios e bordas */
 
-  --blue-500: #2456c9; /* azul royal da marca (destaques) */
-  --blue-400: #2f6ad4;
-  --blue-300: #3f7fe0;
-  --blue-200: #6fa2ec;
+  /* ---- Rampa de etapa ----
+     Matiz único que escurece conforme a solicitação avança.
+     Usada em barras e indicadores de progresso, onde a
+     adjacência torna a leitura imediata. */
+  --etapa-1: #c7d5f5;
+  --etapa-2: #8fb0ec;
+  --etapa-3: #4f7fe0;
+  --etapa-4: #1d4ed8;
 
-  --text: #14245e; /* navy de marca (texto principal) */
-  --text-muted: #41507a;
-  --text-dim: #6b7a99;
-  --border: rgba(20, 36, 94, 0.12);
+  /* ---- Semânticas ----
+     Três cores, usadas em lugar nenhum decorativo. */
+  --pago: #0b6344;
+  --recusado: #b4232b;
+  --atrasado: #c2410c;
 
-  --sans: 'Segoe UI', system-ui, Roboto, Helvetica, Arial, sans-serif;
+  /* ---- Alias dos nomes legados ---- */
+  --navy-900: var(--paper);
+  --navy-800: #f0f2f6;
+  --navy-700: #e8ecf3;
+  --navy-600: var(--rule);
+
+  --blue-500: var(--royal);
+  --blue-400: #2563eb;
+  --blue-300: #3b82f6;
+  --blue-200: #93b4fa;
+
+  --text: var(--ink);
+  --text-muted: var(--ink-2);
+  --text-dim: var(--ink-3);
+  --border: var(--rule);
+
+  /* ---- Tipografia ----
+     Archivo variável: o eixo de largura (wdth) carrega parte da
+     hierarquia, então peso e largura trabalham juntos em vez de
+     o peso fazer tudo sozinho. */
+  --sans:
+    'Archivo Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* Escala modular ~1,25 a partir de 14px */
+  --fs-label: 0.6875rem; /* 11px — rótulo de coluna */
+  --fs-meta: 0.8125rem; /* 13px — metadado */
+  --fs-base: 0.875rem; /* 14px — corpo em área de trabalho */
+  --fs-lg: 1.0625rem; /* 17px — título de seção */
+  --fs-title: 1.375rem; /* 22px — título de tela */
+  --fs-figure: 1.875rem; /* 30px — indicador numérico */
 
   font: 16px/1.5 var(--sans);
-  color: var(--text);
+  color: var(--ink);
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -40,15 +85,8 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(
-      1200px 800px at 78% 32%,
-      rgba(47, 128, 237, 0.14),
-      transparent 60%
-    ),
-    linear-gradient(160deg, var(--navy-800) 0%, var(--navy-900) 60%);
-  background-attachment: fixed;
-  color: var(--text);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 #root {
@@ -63,4 +101,42 @@ a {
 img {
   max-width: 100%;
   display: block;
+}
+
+/* ---- Hierarquia por largura ----
+   font-stretch mapeia no eixo wdth e compõe normalmente com
+   font-weight, diferente de font-variation-settings, que o
+   sobrescreveria e achataria os pesos já definidos em App.css. */
+h1,
+h2,
+h3,
+h4 {
+  font-stretch: 107%;
+  letter-spacing: -0.005em;
+}
+
+/* ---- Números ----
+   Figuras tabulares na área de trabalho: protocolo e valor
+   alinham na vertical e a coluna passa a ser comparável a olho. */
+.crm,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Foco visível ---- */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--royal);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

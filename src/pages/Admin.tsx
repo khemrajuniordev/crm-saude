@@ -6,11 +6,12 @@ export default function Admin() {
   return (
     <main className="admin">
       <div className="shell">
-        <header className="admin-topo">
-          <div>
-            <p className="admin-boasvindas">Ambiente de demonstração</p>
-            <h1 className="page-title admin-titulo">Controle de CRM</h1>
-          </div>
+        {/* Faixa de contexto, não título. O título da tela é o
+            nome do trabalho que se faz nela ("Solicitações",
+            "Dashboard"), definido por cada página. */}
+        <header className="admin-contexto">
+          <span className="admin-marca">Controle de CRM</span>
+          <span className="admin-demo">Ambiente de demonstração</span>
         </header>
 
         <Outlet />
